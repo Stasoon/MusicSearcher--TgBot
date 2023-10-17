@@ -11,7 +11,8 @@ from src.messages.user import UserMessages
 from src.keyboards.user import UserKeyboards
 from src.misc.callback_data import SongsNavCallback, ShowSongCallback
 # from src.utils.tiktok_api import trending_videos
-from src.utils import vk_api, shazam_api
+from src.utils import shazam_api
+from src.utils.vk_api import VkMusicApi
 
 
 # region Menu
@@ -36,7 +37,7 @@ async def handle_start_command(message: Message):
 
 
 async def handle_popular_songs_button(message: Message):
-    songs = vk_api.get_popular_songs(count=8, offset=0)
+    songs = VkMusicApi.get_popular_songs(count=8, offset=0)
     text = UserMessages.get_popular()
     markup = UserKeyboards.get_found_songs(songs, category='popular')
     await message.answer(text=text, reply_markup=markup, parse_mode='HTML')
@@ -65,9 +66,9 @@ async def handle_songs_nav_callback(callback: CallbackQuery, callback_data: Song
 
     match callback_data.get('category'):
         case 'search':
-            songs = vk_api.get_songs_by_text(text=callback.message.text, count=count, offset=offset)
+            songs = VkMusicApi.get_songs_by_text(text=callback.message.text, count=count, offset=offset)
         case 'popular':
-            songs = vk_api.get_popular_songs(count=8, offset=offset)
+            songs = VkMusicApi.get_popular_songs(count=8, offset=offset)
         # case 'new':
         #     songs = vk_api.get_new(count=8, offset=offset)
 
@@ -80,7 +81,7 @@ async def handle_songs_nav_callback(callback: CallbackQuery, callback_data: Song
 async def handle_show_song_callback(callback: CallbackQuery, callback_data: ShowSongCallback):
     await callback.answer()
 
-    song = vk_api.get_song_by_id(song_id=callback_data.get('song_id'), owner_id=callback_data.get('owner_id'))
+    song = VkMusicApi.get_song_by_id(song_id=callback_data.get('song_id'), owner_id=callback_data.get('owner_id'))
     file = InputFile.from_url(url=song.url, filename=f'{song.artist} - {song.title}')
     # cover = InputFile.from_url(url=song.cover)
 
@@ -88,7 +89,7 @@ async def handle_show_song_callback(callback: CallbackQuery, callback_data: Show
     try:
         await callback.message.answer_audio(file)
     except NetworkError:
-        await callback.message.answer()
+        await callback.message.answer('Слишком большой файл!')
 
 
 # endregion
@@ -97,7 +98,7 @@ async def handle_show_song_callback(callback: CallbackQuery, callback_data: Show
 
 
 async def handle_text_message(message: Message):
-    songs = vk_api.get_songs_by_text(text=message.text, count=8)
+    songs = VkMusicApi.get_songs_by_text(text=message.text, count=8)
 
     if not songs:
         await message.answer(text=UserMessages.get_song_not_found(), parse_mode='HTML')
@@ -122,7 +123,6 @@ async def __get_media_file_url(bot: Bot, message: Message) -> str | None:
 
     if not media:
         file = await bot.get_file(media.file_id)
-        print(f'https://api.telegram.org/file/bot{bot_token}/{file.file_path}')
         return f'https://api.telegram.org/file/bot{bot_token}/{file.file_path}'
     return None
 
@@ -141,7 +141,7 @@ async def handle_media_message(message: Message):
         return
 
     cover = InputFile.from_url(url=song_data.photo_url, filename=f'{song_data.title} - обложка')
-    songs = vk_api.get_songs_by_text(text=f'{song_data.title} {song_data.subtitle}', count=5)
+    songs = VkMusicApi.get_songs_by_text(text=f'{song_data.title} {song_data.subtitle}', count=5)
     await timer_msg.delete()
 
     markup = UserKeyboards.get_found_songs(songs, current_page_num=1, append_navigation=False)

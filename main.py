@@ -1,5 +1,3 @@
-import asyncio
-
 from src.start_bot import start_bot
 from src.utils import setup_logger
 

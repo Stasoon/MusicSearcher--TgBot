@@ -26,7 +26,7 @@ class UserKeyboards:
         return markup
 
     @staticmethod
-    def __get_songs_nav_builder(current_page_num: int, category: str, count_per_page: int = 6) -> InlineKeyboardMarkup:
+    def __get_songs_nav_builder(current_page_num: int, category: str, count_per_page: int = 6) -> list[InlineKeyboardButton]:
         buttons = [
             InlineKeyboardButton(
                 text='<', callback_data=SongsNavCallback.new(
@@ -50,8 +50,6 @@ class UserKeyboards:
         markup = InlineKeyboardMarkup()
 
         for song in songs:
-            print(f"{get_formatted_duration(song.duration)} | {song.artist} - {song.title}")
-            print(ShowSongCallback.new(song_id=song.track_id, owner_id=song.owner_id))
             markup.row(
                 InlineKeyboardButton(
                     text=f"{get_formatted_duration(song.duration)} | {song.artist} - {song.title}",

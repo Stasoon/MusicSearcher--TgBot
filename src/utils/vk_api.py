@@ -15,15 +15,14 @@ class VkMusicApi:
 
     @classmethod
     def authorise(cls, login: str, password: str):
-        try:
-            cls.service = Service.parse_config()
-        except Exception as e:
-            print(e)
-            token_receiver = TokenReceiver(login=login, password=password)
+        Service.del_config()
+        token_receiver = TokenReceiver(login=login, password=password)
 
-            if token_receiver.auth():
-                token_receiver.get_token()
-                token_receiver.save_to_config()
+        if token_receiver.auth():
+            token_receiver.get_token()
+            token_receiver.save_to_config()
+
+        cls.service = Service.parse_config()
 
     @classmethod
     def get_songs_by_text(cls, text: str, count: int = 10, offset: int = 0) -> list[Song]:
