@@ -1,0 +1,6 @@
+venv
+.venv
+__pycache__
+.env
+*.ini
+vk_config.v2.json
