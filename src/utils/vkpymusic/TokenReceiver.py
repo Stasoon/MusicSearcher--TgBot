@@ -56,7 +56,7 @@ def on_critical_error_handler(response_auth_json):
     Args:
         response_auth_json (...): Message or object to research.
     """
-    print(f"on_critical_error: {response_auth_json}")
+    logger.error(f"on_critical_error: {response_auth_json}")
 
 
 class TokenReceiver:

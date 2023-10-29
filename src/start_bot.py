@@ -1,11 +1,15 @@
+import asyncio
 from aiogram import executor
 from aiogram.types import BotCommand
 
-from src.utils import logger, vk_api
-from src.create_bot import bot, dp
-from src.database import register_models
+from src.utils.update_songs_catalog import run_periodic_catalog_updates
 from src.handlers import register_all_handlers
-from config import Config
+from src.filters import register_all_filters
+from src.database import register_models
+from src.create_bot import bot, dp
+from src.utils import VkMusicApi
+from config import Config, i18n
+from src.utils import logger
 
 
 async def set_bot_commands():
@@ -24,11 +28,20 @@ async def on_startup(_):
     # Установка команд бота
     await set_bot_commands()
 
+    # Регистрация middlewares
+    dp.middleware.setup(i18n)
+
+    # Регистрация фильтров
+    register_all_filters(dp)
+
     # Регистрация хэндлеров
     register_all_handlers(dp)
 
     # Авторизация в ВК
-    vk_api.VkMusicApi.authorise(login=Config.VK_LOGIN, password=Config.VK_PASSWD)
+    VkMusicApi.authorise(login=Config.VK_LOGIN, password=Config.VK_PASSWD)
+
+    # Обновление каталога популярных и новых песен раз в сутки
+    asyncio.create_task(run_periodic_catalog_updates())
 
     logger.info('Бот запущен!')
 
@@ -42,4 +55,3 @@ def start_bot():
         executor.start_polling(dispatcher=dp, on_startup=on_startup, on_shutdown=on_shutdown, skip_updates=True)
     except Exception as e:
         logger.exception(e)
-
