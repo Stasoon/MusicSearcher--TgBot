@@ -5,10 +5,9 @@ from config import Config
 from src.filters import IsSubscriberFilter
 from src.keyboards.user import UserKeyboards
 from src.messages.user import UserMessages
-# from src.utils.tiktok_api import trending_videos
 from src.utils import shazam_api
-from src.utils.tiktok_api import get_video
 from src.utils.vk_music_api import VkMusicApi
+from src.utils import tiktok_api
 
 
 # region Utils
@@ -51,7 +50,7 @@ async def handle_text_message(message: Message):
 async def handle_media_message(message: Message):
     timer_msg = await message.answer('⏳')
     file_url = await __get_media_file_url(message.bot, message)
-    # if not file_url: return
+    if not file_url: return
 
     try:
         song_data = await shazam_api.recognize_song(file_url=file_url)
@@ -80,10 +79,11 @@ async def handle_youtube_link(message: Message):
 
 
 async def handle_tik_tok_link(message: Message):
-    await message.answer('К сожалению, я пока что не умею обрабатывать ссылки на TikTok 😟')
-    # video_path = await get_video(message.text)
-    # video_file = InputFile(video_path)
-    # await message.answer_video(video_file)
+    try:
+        await tiktok_api.get_video(message.text)
+    except Exception as e:
+        print(e)
+        await message.answer('К сожалению, я пока что не умею обрабатывать ссылки на TikTok 😟')
 
 
 # endregion

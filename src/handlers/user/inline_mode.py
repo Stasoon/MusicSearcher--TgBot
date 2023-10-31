@@ -18,37 +18,60 @@ def get_not_found():
     )
 
 
-async def handle_inline(query: InlineQuery):
-    max_offset = 20
-    offset = int(query.offset) if len(query.offset) > 0 else 0
-    next_offset = offset + 10
-    if offset + 10 > max_offset:
-        return
+async def inline_search(query: InlineQuery):
+    results = []
+    channels = ['stascsa', 'testchannel', 'wb']
+    for channel_link in channels:
+        # Создаем описание с ссылкой на канал
+        channel_link = "https://t.me/your_channel_username"  # Замените на фактическую ссылку на канал
+        description_with_link = f"<a href='{channel_link}'>Перейти в канал</a>"
 
-    songs = await VkMusicApi.get_songs_by_text(text=query.query, offset=offset)
-
-    if not songs:
-        await query.answer(results=[get_not_found()], cache_time=1, is_personal=True)
-        return
-
-    response_items = []
-    bot_username = (await query.bot.get_me()).username
-    markup = UserKeyboards.get_(bot_username=bot_username)
-
-    for song in songs:
-        audio = __get_song_file(song)
-        if not isinstance(audio, str): audio = song.url
-
-        response_items.append(
-            InlineQueryResultAudio(
-                id=f"{song.owner_id}_{song.audio_id}",
-                audio_url=audio, title=song.title, performer=song.artist,
-                reply_markup=markup, parse_mode='HTML'
-            )
+        # Создаем InlineQueryResultArticle с описанием, содержащим ссылку
+        result = InlineQueryResultArticle(
+            id="1",
+            title="Заголовок результата",
+            input_message_content=InputTextMessageContent(message_text="Текст сообщения"),
+            description=description_with_link,
         )
 
-    await query.answer(response_items, cache_time=1, is_personal=True, next_offset=next_offset)
+        results.append(result)
+
+    # Отправляем результаты в ответ на инлайн-запрос
+    await query.answer(results, cache_time=1)
+
+
+# async def handle_inline(query: InlineQuery):
+#     max_offset = 20
+#     offset = int(query.offset) if len(query.offset) > 0 else 0
+#     next_offset = offset + 10
+#     if offset + 10 > max_offset:
+#         return
+#
+#     songs = await VkMusicApi.get_songs_by_text(text=query.query, offset=offset)
+#
+#     if not songs:
+#         await query.answer(results=[get_not_found()], cache_time=1, is_personal=True)
+#         return
+#
+#     response_items = []
+#     bot_username = (await query.bot.get_me()).username
+#     markup = UserKeyboards.get_(bot_username=bot_username)
+#
+#     for song in songs:
+#         audio = __get_song_file(song)
+#         if not isinstance(audio, str): audio = song.url
+#
+#         response_items.append(
+#             InlineQueryResultAudio(
+#                 id=f"{song.owner_id}_{song.audio_id}",
+#                 audio_url=audio, title=song.title, performer=song.artist,
+#                 reply_markup=markup, parse_mode='HTML'
+#             )
+#         )
+#
+#     await query.answer(response_items, cache_time=1, is_personal=True, next_offset=next_offset)
 
 
 def register_inline_mode_handlers(dp: Dispatcher):
-    dp.register_inline_handler(handle_inline, IsSubscriberFilter())
+    # dp.register_inline_handler(handle_inline, IsSubscriberFilter())
+    dp.register_inline_handler(inline_search, IsSubscriberFilter())

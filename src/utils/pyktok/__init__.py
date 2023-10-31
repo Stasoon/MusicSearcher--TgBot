@@ -1,1 +1,1 @@
-from .pyktok import specify_browser, save_tiktok
+from .pyktok import save_tiktok

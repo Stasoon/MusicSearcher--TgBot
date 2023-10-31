@@ -1,12 +1,15 @@
+import random
+
 import aiohttp
 from shazamio import Shazam, Serialize
 from shazamio.schemas.models import TrackInfo
-from typing_extensions import Literal
+from shazamio.user_agent import USER_AGENTS
+from typing import Literal
 
 
 async def recognize_song(file_url: str) -> TrackInfo:
     """ Получает информацию о треке по url """
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(headers={"User-Agent": random.choice(USER_AGENTS)}) as session:
         async with session.get(file_url) as response:
             data = await response.read()
 

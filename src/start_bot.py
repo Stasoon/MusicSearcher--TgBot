@@ -40,9 +40,6 @@ async def on_startup(_):
     # Авторизация в ВК
     VkMusicApi.authorise(login=Config.VK_LOGIN, password=Config.VK_PASSWD)
 
-    # Обновление каталога популярных и новых песен раз в сутки
-    asyncio.create_task(run_periodic_catalog_updates())
-
     logger.info('Бот запущен!')
 
 
@@ -52,6 +49,9 @@ async def on_shutdown(_):
 
 def start_bot():
     try:
+        loop = asyncio.get_event_loop()
+        loop.create_task(run_periodic_catalog_updates())
+
         executor.start_polling(dispatcher=dp, on_startup=on_startup, on_shutdown=on_shutdown, skip_updates=True)
     except Exception as e:
         logger.exception(e)

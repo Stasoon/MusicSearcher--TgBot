@@ -1,9 +1,11 @@
 import json
+import os
+import random
 import re
 from random import choice
 
-import browser_cookie3
 import requests
+from pathlib import Path
 # import aiohttp
 from bs4 import BeautifulSoup
 from shazamio.user_agent import USER_AGENTS
@@ -17,7 +19,7 @@ headers = {'Accept-Encoding': 'gzip, deflate, sdch',
            'Cache-Control': 'max-age=0',
            'Connection': 'keep-alive'}
 proxies = {
-    'https': '64.225.4.17:10005'
+    'http': 'user139226:5ptznc@45.90.197.65:8754'
 }
 url_regex = '(?<=\.com/)(.+?)(?=\?|$)'
 runsb_err = ('No browser defined for cookie extraction. We strongly recommend you run \'specify_browser\', '
@@ -25,33 +27,21 @@ runsb_err = ('No browser defined for cookie extraction. We strongly recommend yo
              '"chrome," "firefox," "edge," etc.')
 
 
-class BrowserNotSpecifiedError(Exception):
-    def __init__(self):
-        super().__init__(runsb_err)
+with open(Path(__file__).parent / 'tiktok_cookies.json', 'r') as cookie_file:
+    cookies = json.load(cookie_file)
+cookies_dict = {cookie["name"]: cookie["value"] for cookie in cookies}
 
 
-def specify_browser(browser):
-    global cookies
-    cookies = getattr(browser_cookie3, browser)(domain_name='www.tiktok.com')
-
-
-def get_tiktok_data_json(video_url, browser_name=None):
-    if 'cookies' not in globals() and browser_name is None:
-        raise BrowserNotSpecifiedError
-    global cookies
-
-    if browser_name is not None:
-        cookies = getattr(browser_cookie3, browser_name)(domain_name='www.tiktok.com')
-
+def get_tiktok_data_json(video_url):
     response = requests.get(
         video_url, headers=headers,
-        cookies=cookies, timeout=20,
-        # proxies=proxies
+        cookies=cookies_dict, timeout=20,
+        proxies=proxies
     )
     print(response)
+    print(response.cookies)
 
     # retain any new cookies that got set in this request
-    cookies = response.cookies
     soup = BeautifulSoup(response.text, "html.parser")
     tt_script = soup.find('script', attrs={'id': "SIGI_STATE"})
     try:
@@ -76,11 +66,10 @@ def save_tiktok(
         browser_name=None,
         save_path: str = ''
 ):
-    if 'cookies' not in globals() and browser_name is None:
-        raise BrowserNotSpecifiedError
     print('start saving')
 
-    tt_json = get_tiktok_data_json(video_url, browser_name)
+    tt_json = get_tiktok_data_json(video_url)
+    print(tt_json)
 
     if 'imagePost' in tt_json:
         return
