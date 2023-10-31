@@ -1,15 +1,11 @@
+import os
+import json
 from typing import Callable
 
-import os
-import logging
-
-import json
 import requests
+from loguru import logger
 
 from .Client import clients
-from .Logger import get_logger
-
-logger: logging = get_logger(__name__)
 
 
 def on_captcha_handler(url: str) -> str:
@@ -56,7 +52,7 @@ def on_critical_error_handler(response_auth_json):
     Args:
         response_auth_json (...): Message or object to research.
     """
-    print(f"on_critical_error: {response_auth_json}")
+    logger.error(f"on_critical_error: {response_auth_json}")
 
 
 class TokenReceiver:

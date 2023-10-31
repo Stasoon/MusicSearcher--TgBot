@@ -1,0 +1,86 @@
+# Translations template for PROJECT.
+# Copyright (C) 2023 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2023-10-29 12:51+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: src/keyboards/user.py:38
+msgid "✅ Проверить ✅"
+msgstr ""
+
+#: src/keyboards/user.py:46 src/messages/user.py:38
+msgid "🎶 Новинки"
+msgstr ""
+
+#: src/keyboards/user.py:46 src/messages/user.py:34
+msgid "🎧 Популярное"
+msgstr ""
+
+#: src/keyboards/user.py:47
+msgid "🔍 Поиск"
+msgstr ""
+
+#: src/messages/user.py:10
+msgid "👋 Привет, {user_name}!"
+msgstr ""
+
+#: src/messages/user.py:14
+msgid "🌏 Выберите язык:"
+msgstr ""
+
+#: src/messages/user.py:18
+msgid "✅ Язык выбран"
+msgstr ""
+
+#: src/messages/user.py:22
+msgid "❗Подпишитесь на каналы, чтобы получить песню❗"
+msgstr ""
+
+#: src/messages/user.py:26
+msgid ""
+"✅ Готово! \n"
+"Можете пользоваться ботом."
+msgstr ""
+
+#: src/messages/user.py:30
+msgid "Вы подписались не на все каналы 😔"
+msgstr ""
+
+#: src/messages/user.py:42
+msgid ""
+"<b>🔎 Чтобы найти музыку, отправьте мне что-то из этого: \n"
+"\n"
+"• Название песни или исполнителя \n"
+"• Ссылку на TikTok \n"
+"• Видео \n"
+"• Голосовое сообщение \n"
+"• Видеосообщение</b>"
+msgstr ""
+
+#: src/messages/user.py:53
+msgid ""
+"🎵 Название песни: <b>{song_title}</b> \n"
+"🎸 Исполнитель: <b>{author_name}</b>"
+msgstr ""
+
+#: src/messages/user.py:65
+msgid "Песня не найдена 😔🎧"
+msgstr ""
+
+#: src/messages/user.py:69
+msgid "Аудиофайл слишком много весит 😔"
+msgstr ""
+

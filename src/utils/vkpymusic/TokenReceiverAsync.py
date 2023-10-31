@@ -1,15 +1,11 @@
+import os
+import json
 from typing import Callable
 
-import os
-import logging
-
-import json
 import requests
+from loguru import logger
 
 from .Client import clients
-from .Logger import get_logger
-
-logger: logging = get_logger(__name__)
 
 
 class TokenReceiverAsync:
