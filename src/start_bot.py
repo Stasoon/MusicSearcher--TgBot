@@ -1,15 +1,11 @@
-import asyncio
 from aiogram import executor
 from aiogram.types import BotCommand
 
-from src.utils.update_songs_catalog import run_periodic_catalog_updates
-from src.handlers import register_all_handlers
-from src.filters import register_all_filters
-from src.database import register_models
+from src.utils import logger, vk_api
 from src.create_bot import bot, dp
-from src.utils import VkMusicApi
-from config import Config, i18n
-from src.utils import logger
+from src.database import register_models
+from src.handlers import register_all_handlers
+from config import Config
 
 
 async def set_bot_commands():
@@ -28,17 +24,15 @@ async def on_startup(_):
     # Установка команд бота
     await set_bot_commands()
 
-    # Регистрация middlewares
-    dp.middleware.setup(i18n)
-
-    # Регистрация фильтров
-    register_all_filters(dp)
-
     # Регистрация хэндлеров
     register_all_handlers(dp)
 
     # Авторизация в ВК
+<<<<<<< HEAD
     VkMusicApi.authorise(login=Config.VK_LOGIN, password=Config.VK_PASSWD)
+=======
+    vk_api.VkMusicApi.authorise(login=Config.VK_LOGIN, password=Config.VK_PASSWD)
+>>>>>>> parent of 39c5186 (Work)
 
     logger.info('Бот запущен!')
 
@@ -55,3 +49,4 @@ def start_bot():
         executor.start_polling(dispatcher=dp, on_startup=on_startup, on_shutdown=on_shutdown, skip_updates=True)
     except Exception as e:
         logger.exception(e)
+

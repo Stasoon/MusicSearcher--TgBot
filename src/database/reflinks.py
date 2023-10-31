@@ -6,8 +6,8 @@ def get_link(reflink: str) -> list | None:
     return (link.name, link.user_count, link.passed_op_count) if link else None
 
 
-def get_all_links() -> list[ReferralLink]:
-    return [link for link in ReferralLink.select()]
+def get_link_names() -> list:
+    return [link.name for link in ReferralLink.select()]
 
 
 def increase_or_create_reflink(reflink: str):
@@ -45,3 +45,5 @@ def is_reflink_exists(reflink: str) -> bool:
 
 def delete_reflink(reflink: str):
     ReferralLink.delete().where(ReferralLink.name == reflink).execute()
+
+

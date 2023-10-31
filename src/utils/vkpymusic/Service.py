@@ -1,16 +1,20 @@
 import configparser
+import json
 import logging
 import os
 
-import aiohttp
+import asyncio
+import requests
+from requests import Response, Session
 
 from .Logger import get_logger
-from .VkSong import VkSong
+from .Playlist import Playlist
+from .Song import Song
 
 logger: logging = get_logger(__name__)
 
 
-class AsyncService:
+class Service:
     def __init__(self, user_agent: str, token: str):
         self.user_agent = user_agent
         self.__token = token
@@ -33,7 +37,7 @@ class AsyncService:
             user_agent = config["VK"]["user_agent"]
             token = config["VK"]["token_for_audio"]
 
-            return AsyncService(user_agent, token)
+            return Service(user_agent, token)
         except Exception as e:
             logger.warning(e)
 
@@ -57,9 +61,10 @@ class AsyncService:
     ##########################
     # COMMON REQUEST FOR AUDIO
 
-    async def __get_response_content(
+    def __get_response(
         self, method: str, params: list[tuple[str, str or int]]
-    ) -> dict:
+    ) -> Response:
+        api_headers = {"User-Agent": self.user_agent}
         api_url = f"https://api.vk.com/method/audio.{method}"
         api_parameters = [
             ("access_token", self.__token),
@@ -72,79 +77,136 @@ class AsyncService:
         for pair in params:
             api_parameters.append(pair)
 
-        headers = {"User-Agent": self.user_agent}
-        async with aiohttp.ClientSession() as session:
-            async with session.post(api_url, data=api_parameters, headers=headers) as response:
-                content = await response.json()
-                return content
+        session = Session()
+        session.headers.update(api_headers)
+        response = session.post(
+            url=api_url,
+            data=api_parameters,
+        )
+        session.close()
+
+        return response
 
     ##############
     # ANY REQUESTS
 
-    # async def __getCount(self, user_id: int) -> dict:
-    #     params = [
-    #         ("owner_id", user_id),
-    #     ]
-    #     return await self.__get_response_content("getCount", params)
+    def __getCount(self, user_id: int) -> Response:
+        params = [
+            ("owner_id", user_id),
+        ]
 
-    async def __get(
+        return self.__get_response("getCount", params)
+
+    def __get(
         self,
         user_id: int,
         count: int = 100,
-        offset: int = 0
-    ) -> dict:
+        offset: int = 0,
+        playlist_id: int or None = None,
+        access_key: str or None = None,
+    ) -> Response:
         params = [
             ("owner_id", user_id),
             ("count", count),
             ("offset", offset),
         ]
-        return await self.__get_response_content("get", params)
 
-    async def __search(self, text: str, count: int = 10, offset: int = 0) -> dict:
+        if playlist_id:
+            params.append(("album_id", playlist_id))
+            params.append(("access_key", access_key))
+
+        return self.__get_response("get", params)
+
+    def __search(self, text: str, count: int = 100, offset: int = 0) -> Response:
         params = [
             ("q", text),
             ("count", count),
             ("offset", offset),
-            ("sort", 2),  # сортировка - по популярности
-            ("autocomplete", 1)  # исправлять ошибки
+            ("sort", 0),
+            ("autocomplete", 1),
         ]
-        return await self.__get_response_content("search", params)
+
+        return self.__get_response("search", params)
+
+    def __getPlaylists(
+        self, user_id: int, count: int = 50, offset: int = 0
+    ) -> Response:
+        params = [
+            ("owner_id", user_id),
+            ("count", count),
+            ("offset", offset),
+        ]
+
+        return self.__get_response("getPlaylists", params)
+
+    def __searchPlaylists(
+        self, text: str, count: int = 50, offset: int = 0
+    ) -> Response:
+        params = [
+            ("q", text),
+            ("count", count),
+            ("offset", offset),
+        ]
+
+        return self.__get_response("searchPlaylists", params)
+
+    def __searchAlbums(self, text: str, count: int = 50, offset: int = 0) -> Response:
+        params = [
+            ("q", text),
+            ("count", count),
+            ("offset", offset),
+        ]
+
+        return self.__get_response("searchAlbums", params)
 
     ############
     # CONVERTERS
 
-    async def __response_to_songs(self, response_content: dict):
+    def __response_to_songs(self, response: Response):
+        response = json.loads(response.content.decode("utf-8"))
         try:
-            items = response_content["response"]["items"]
+            items = response["response"]["items"]
         except (KeyError, TypeError):
-            items = response_content["response"]
+            items = response["response"]
 
-        songs: list[VkSong] = []
+        songs: list[Song] = []
         for item in items:
-            song = VkSong.from_json(item)
+            song = Song.from_json(item)
             songs.append(song)
         return songs
+
+    def __response_to_playlists(self, response: Response):
+        response = json.loads(response.content.decode("utf-8"))
+        try:
+            items = response["response"]["items"]
+        except Exception as e:
+            logger.error(e)
+        playlists: list[Playlist] = []
+        for item in items:
+            playlist = Playlist.from_json(item)
+            playlists.append(playlist)
+        return playlists
 
     ##############
     # MAIN METHODS
 
-    async def get_song_by_id(self, owner_id: int, audio_id: int):
+    def get_song_by_id(self, owner_id: int, audio_id: int):
         params = [
             ("audios", f"{owner_id}_{audio_id}")
         ]
 
         try:
-            content = await self.__get_response_content(method='getById', params=params)
-            content = content['response'][0]
-            song = VkSong.from_json(content)
+            response: Response = self.__get_response(method='getById', params=params)
+            content = json.loads(response.content.decode("utf-8"))['response'][0]
+            song = Song.from_json(content)
         except Exception as e:
             logger.error(e)
             return
         return song
 
-    async def search_songs_by_text(
+    def search_songs_by_text(
         self, text: str, count: int = 3, offset: int = 0
-    ) -> list[VkSong] | None:
+    ) -> list[Song] | None:
         """
         Search songs by text/query.
 
@@ -154,11 +216,11 @@ class AsyncService:
             offset (int): Set offset for result. For example, count = 100, offset = 100 -> 101-200.
 
         Returns:
-            list[VkSong]: List of songs.
+            list[Song]: List of songs.
         """
         try:
-            response = await self.__search(text, count, offset)
-            songs = await self.__response_to_songs(response)
+            response = self.__search(text, count, offset)
+            songs = self.__response_to_songs(response)
         except Exception as e:
             logger.error(e)
             return
@@ -168,12 +230,202 @@ class AsyncService:
         else:
             return songs
 
-    async def get_popular(self, count: int = 10, offset: int = 0):
+    def get_popular(self, count: int = 10, offset: int = 0):
         params = [
             ("count", count),
             ("offset", offset),
             ("only_eng", 0),
         ]
-        response = await self.__get_response_content(method='getPopular', params=params)
-        songs = await self.__response_to_songs(response)
+        response = self.__get_response(method='getPopular', params=params)
+        songs = self.__response_to_songs(response)
         return songs
+
+    def get_songs_by_userid(
+        self, user_id: str or int, count: int = 100, offset: int = 0
+    ) -> list[Song]:
+        """
+        Search songs by owner/user id.
+
+        Args:
+            user_id (str or int): VK user id. (NOT USERNAME! vk.com/id*******).
+            count (int):          Count of resulting songs (for VK API: default/max = 100).
+            offset (int):         Set offset for result. For example, count = 100, offset = 100 -> 101-200.
+
+        Returns:
+            list[Song]: List of songs.
+        """
+        user_id = int(user_id)
+        logger.info(f"Request by user: {user_id}")
+
+        try:
+            response: Response = self.__get(user_id, count, offset)
+            songs = self.__response_to_songs(response)
+        except Exception as e:
+            logger.error(e)
+            return
+
+        if len(songs) == 0:
+            logger.info("No results found ._.")
+        else:
+            logger.info("Results:")
+            for i, song in enumerate(songs, start=1):
+                logger.info(f"{i}) {song}")
+        return songs
+
+    def get_songs_by_playlist_id(
+        self,
+        user_id: str or int,
+        playlist_id: int,
+        access_key: str,
+        count: int = 100,
+        offset: int = 0,
+    ) -> list[Song]:
+        """
+        Get songs by playlist id.
+
+        Args:
+            user_id (str or int): VK user id. (NOT USERNAME! vk.com/id*******).
+            playlist_id (int):    VK playlist id. (Take it from methods for playlist).
+            access_key (str):     VK access key. (Take it from methods for playlist).
+            count (int):          Count of resulting songs (for VK API: default/max = 100).
+            offset (int):         Set offset for result. For example, count = 100, offset = 100 -> 101-200.
+
+        Returns:
+            list[Song]: List of songs.
+        """
+        user_id = int(user_id)
+        logger.info(f"Request by user: {user_id}")
+
+        try:
+            response: Response = self.__get(
+                user_id, count, offset, playlist_id, access_key
+            )
+            songs = self.__response_to_songs(response)
+        except Exception as e:
+            logger.error(e)
+            return
+
+        if len(songs) == 0:
+            logger.info("No results found ._.")
+        else:
+            logger.info("Results:")
+            for i, song in enumerate(songs, start=1):
+                logger.info(f"{i}) {song}")
+        return songs
+
+    def get_songs_by_playlist(
+        self, playlist: Playlist, count: int = 10, offset: int = 0
+    ) -> list[Song]:
+        """
+        Get songs by instance of 'Playlist'.
+
+        Args:
+            playlist (Playlist): Instance of 'Playlist' (take from methods for receiving Playlist).
+            count (int):         Count of resulting songs (for VK API: default/max = 100).
+            offset (int):        Set offset for result. For example, count = 100, offset = 100 -> 101-200.
+
+        Returns:
+            list[Song]: List of songs.
+        """
+        logger.info(f"Request by playlist: {playlist}")
+
+        try:
+            response: Response = self.__get(
+                playlist.owner_id,
+                count,
+                offset,
+                playlist.playlist_id,
+                playlist.access_key,
+            )
+            songs = self.__response_to_songs(response)
+        except Exception as e:
+            logger.error(e)
+            return
+
+        if len(songs) == 0:
+            logger.info("No results found ._.")
+        else:
+            logger.info("Results:")
+            for i, song in enumerate(songs, start=1):
+                logger.info(f"{i}) {song}")
+        return songs
+
+    def get_playlists_by_userid(
+        self, user_id: str or int, count: int = 5, offset: int = 0
+    ) -> list[Playlist]:
+        """
+        Get playlist by owner/user id.
+
+        Args:
+            user_id (str or int): VK user id. (NOT USERNAME! vk.com/id*******).
+            count (int):          Count of resulting playlists (for VK API: default = 50, max = 100).
+            offset (int):         Set offset for result. For example, count = 100, offset = 100 -> 101-200.
+
+        Returns:
+            list[Playlist]: List of playlists.
+        """
+        user_id = int(user_id)
+        logger.info(f"Request by user: {user_id}")
+
+        try:
+            response = self.__getPlaylists(user_id, count, offset)
+            playlists = self.__response_to_playlists(response)
+        except Exception as e:
+            logger.error(e)
+            return
+
+        if len(playlists) == 0:
+            logger.info("No results found ._.")
+        else:
+            logger.info("Results:")
+            for i, playlist in enumerate(playlists, start=1):
+                logger.info(f"{i}) {playlist}")
+        return playlists
+
+    @staticmethod
+    def save_music(song: Song) -> str:
+        """
+        Save song to '{workDirectory}/Music/{songname}.mp3'.
+
+        Args:
+            song (Song): 'Song' instance obtained from 'Service' methods.
+
+        Returns:
+            str: relative path of downloaded music.
+        """
+        song.to_safe()
+        file_name_mp3 = f"{song}.mp3"
+        url = song.url
+
+        if url == "":
+            logger.warning("Url no found")
+            return
+
+        response = requests.get(url=url)
+        if response.status_code == 200:
+            if not os.path.exists("Music"):
+                os.makedirs("Music")
+                logger.info("Folder 'Music' was created")
+
+            file_path = os.path.join(os.getcwd(), "Music", file_name_mp3)
+
+            if not os.path.exists(file_path):
+                if "index.m3u8" in url:
+                    logger.error(".m3u8 detected!")
+                    return
+            else:
+                logger.warning(
+                    f"File with name {file_name_mp3} exists. Overwrite it? (Y/n)"
+                )
+
+                res = input().lower()
+                if res.lower() != "y" and res.lower() != "yes":
+                    return
+
+        response.close()
+        logger.info(f"Downloading {song}...")
+        with open(file_path, "wb") as output_file:
+            output_file.write(response.content)
+
+        logger.info(f"Success! Music was downloaded in '{file_path}'")
+        return file_path
