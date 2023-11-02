@@ -131,7 +131,6 @@ async def handle_show_song_callback(callback: CallbackQuery, callback_data: Show
     song = await VkMusicApi.get_song_by_id(owner_id=owner_id, song_id=song_id)
 
     if not song:
-        await VkMusicApi.get_song_by_id(owner_id=2001209496, song_id=123209496)
         await callback.message.answer('Произошла ошибка :(')
         return
 

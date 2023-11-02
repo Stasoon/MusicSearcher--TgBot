@@ -10,4 +10,6 @@ pybabel compile -d locales -D messages
 
 
 2) Парсинг с динамических страниц ВК новых и популярных песен на Linux (selenium):
-- playwright install chromium
+- python -m playwright install chromium
+- python -m playwright install-deps
+- sudo apt install ffmpeg 

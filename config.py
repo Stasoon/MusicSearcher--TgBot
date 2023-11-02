@@ -20,6 +20,7 @@ class Config:
     TIKTOK_TOKEN: Final = os.getenv('TIKTOK_TOKEN')
 
     WORKDIR = Path(__file__).parent
+    WEBDRIVER_PATH = WORKDIR / 'webdriver/chromedriver.exe'
     LOCALES_DIR = WORKDIR/'locales'
     CSV_FOLDER = './db_exports'
 

@@ -132,7 +132,6 @@ class AsyncService:
 
         try:
             content = await self.__get_response_content(method='getById', params=params)
-            print(content)
             content = content['response'][0]
             song = VkSong.from_json(content)
         except Exception as e:

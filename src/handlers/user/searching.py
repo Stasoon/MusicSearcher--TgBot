@@ -34,6 +34,7 @@ async def __get_media_file_url(bot: Bot, message: Message) -> str | None:
 
 # region Handlers
 
+
 async def handle_text_message(message: Message):
     await message.answer_chat_action(action='typing')
     songs = await VkMusicApi.get_songs_by_text(text=message.text, count=8)

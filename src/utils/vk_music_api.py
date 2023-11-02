@@ -1,10 +1,4 @@
-from typing import List
-
-from chromedriver_py import binary_path
 from playwright.async_api import async_playwright
-from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.common.by import By
 
 from src.utils.vkpymusic import AsyncService, TokenReceiver, VkSong
 
@@ -31,51 +25,66 @@ class VkMusicApi:
     @classmethod
     async def get_song_by_id(cls, owner_id: int, song_id: int) -> VkSong:
         """ Получает песню из VK """
-        print(owner_id, song_id)
         song = await cls.service.get_song_by_id(owner_id=owner_id, audio_id=song_id)
-        print(song)
         return song
 
 
 class VkMusicParser:
-    """
-    Парсер песен с сайта Vk, использующий Selenium.
-    """
     BASE_URL = 'https://vk.com/audio'
 
-    def __init__(self):
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--headless')
-        svc = webdriver.ChromeService(executable_path=binary_path)
-        self.driver = webdriver.Chrome(service=svc, options=chrome_options)
-
-    def get_chart_songs(self):
+    @classmethod
+    async def get_chart_songs(cls):
         """
         Получает новые песни из чарта Vk.
-        Работает медленно, поэтому использовать только для получения песен для дальнейшей сериализации
         """
-        return self.__parse_songs(block_name='chart')
+        return await cls.__parse_songs(block_name='chart')
 
-    def get_new_songs(self):
+    @classmethod
+    async def get_new_songs(cls):
         """
         Получает новые песни из Vk.
-        Работает медленно, поэтому использовать только для получения песен для дальнейшей сериализации
         """
-        return self.__parse_songs(block_name='new_songs')
+        return await cls.__parse_songs(block_name='new_songs')
 
-    def __parse_songs(self, block_name: str) -> list[VkSong]:
-        self.driver.get(f'{self.BASE_URL}?block={block_name}')
-        self.driver.implicitly_wait(1)
-        song_elements = self.driver.find_elements(by=By.CLASS_NAME, value='audio_row_content')
-        songs = []
-        for song_element in song_elements:
-            try:
-                song = self.__get_song_from_element(song_element)
-            except (TypeError, ValueError):
-                continue
-            songs.append(song)
-        self.driver.quit()
-        return songs
+    @classmethod
+    async def __parse_songs(cls, block_name: str) -> list[VkSong]:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch()
+            page = await browser.new_page()
+            await page.goto(f"{cls.BASE_URL}?block={block_name}")
+            await page.wait_for_selector('.audio_row__inner')
+
+            song_elements = await page.query_selector_all('.audio_row__inner')
+
+            songs = []
+            for song_element in song_elements:
+                try:
+                    song = await cls.__get_song_from_element(song_element)
+                except (TypeError, ValueError) as e:
+                    print(e)
+                    continue
+                songs.append(song)
+
+            await browser.close()
+            return songs
+
+    @classmethod
+    async def __get_song_from_element(cls, song_element) -> VkSong:
+        title_element = await song_element.query_selector('.audio_row__title_inner')
+        title = await title_element.inner_text()
+
+        href = await title_element.get_attribute(name='href')
+        owner_id, song_id = map(int, str(href).replace('/audio', '').split('_'))
+
+        artist_element = await song_element.query_selector('.audio_row__performers')
+        artist = await artist_element.inner_text()
+
+        duration_element = await song_element.query_selector('.audio_row__duration')
+        duration_str = await duration_element.inner_text()
+        duration = cls.__get_seconds_from_duration(duration_str)
+
+        song = VkSong(title=title, artist=artist, owner_id=owner_id, song_id=song_id, duration=duration)
+        return song
 
     @staticmethod
     def __get_seconds_from_duration(duration: str, splitter: str = ':'):
@@ -86,16 +95,3 @@ class VkMusicParser:
         elif len(parts) == 1:
             seconds = int(parts[0])
             return seconds
-
-    def __get_song_from_element(self, song_element) -> VkSong:
-        title_element = song_element.find_element(By.CLASS_NAME, value='audio_row__title_inner')
-        title = title_element.text
-        href = title_element.get_attribute('href')
-        owner_id, song_id = map(int, str(href).replace(f'{self.BASE_URL}', '').split('_'))
-        artist_element = song_element.find_element(By.CLASS_NAME, value='audio_row__performers')
-        artist = artist_element.text
-        duration_element = song_element.find_element(By.CLASS_NAME, value='audio_row__duration')
-        duration_str = duration_element.text
-        duration = self.__get_seconds_from_duration(duration_str)
-
-        return VkSong(title=title, artist=artist, owner_id=owner_id, song_id=song_id, duration=duration)
