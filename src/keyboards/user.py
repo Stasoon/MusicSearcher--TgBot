@@ -100,3 +100,9 @@ class UserKeyboards:
         markup = InlineKeyboardMarkup(row_width=1)
         markup.add(InlineKeyboardButton(url=f'https://t.me/{bot_username}', text='🎵 Найти песню 🎵'))
         return markup
+
+    @staticmethod
+    def get_recognize_song_from_video_button() -> InlineKeyboardMarkup:
+        markup = InlineKeyboardMarkup(row_width=1)
+        markup.add(InlineKeyboardButton(text='🎵 Узнать песню 🎵', callback_data='recognize_song_from_video'))
+        return markup

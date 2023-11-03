@@ -65,5 +65,13 @@ class UserMessages:
         return _("Песня не найдена 😔🎧")
 
     @staticmethod
-    def get_audiofile_too_huge_error() -> str:
-        return _("Аудиофайл слишком много весит 😔")
+    def get_file_too_big_error() -> str:
+        return _("Файл слишком много весит 😔")
+
+    @staticmethod
+    def get_throttled_error() -> str:
+        return _("Пожалуйста, не так часто 🙏")
+
+    @staticmethod
+    def get_file_download(download_link: str) -> str:
+        return _("Вы можете скачать файл по <a href={}>🔗 этой ссылке 🔗</a>").format(download_link)

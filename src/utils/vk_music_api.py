@@ -61,7 +61,6 @@ class VkMusicParser:
                 try:
                     song = await cls.__get_song_from_element(song_element)
                 except (TypeError, ValueError) as e:
-                    print(e)
                     continue
                 songs.append(song)
 

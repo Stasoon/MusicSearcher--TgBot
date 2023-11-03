@@ -2,7 +2,7 @@ from aiogram import Dispatcher
 from aiogram.types import InlineQuery, InlineQueryResultAudio, InlineQueryResultArticle, InputTextMessageContent
 
 from src.filters import IsSubscriberFilter
-from src.handlers.user.navigation import __get_song_file
+from src.handlers.user.searching import get_song_file
 from src.keyboards.user import UserKeyboards
 from src.messages.user import UserMessages
 from src.utils import VkMusicApi
@@ -59,7 +59,7 @@ async def handle_search_song_inline(query: InlineQuery):
     markup = UserKeyboards.get_(bot_username=bot_username)
 
     for song in songs:
-        audio = __get_song_file(song)
+        audio = get_song_file(song)
         if not isinstance(audio, str): audio = song.url
 
         response_items.append(

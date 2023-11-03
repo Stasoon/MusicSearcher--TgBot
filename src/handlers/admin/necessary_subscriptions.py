@@ -43,7 +43,11 @@ class Keyboards:
 class Handlers:
     @staticmethod
     async def send_subchecking_menu(message: types.Message):
-        await message.answer('Что вы хотите сделать?', reply_markup=Keyboards.subchecking_menu)
+        text = '📲 Каналы на ОП: \n\n'
+        text += " \n".join(
+            f"{n}) <a href='{channel.url}'>{channel.title}</a>" for n, channel in enumerate(get_channels(), start=1)
+        ) + ' \n\nЧто вы хотите сделать?'
+        await message.answer(text=text, reply_markup=Keyboards.subchecking_menu, parse_mode='HTML')
 
     @staticmethod
     async def __handle_subchecking_message(message: types.Message) -> None:

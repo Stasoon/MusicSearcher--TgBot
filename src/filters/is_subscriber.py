@@ -1,11 +1,11 @@
-from aiogram import Bot
-from aiogram.dispatcher.filters import BoundFilter
 from aiogram.types import ChatMemberStatus, InlineKeyboardMarkup, CallbackQuery
 from aiogram.utils.exceptions import Unauthorized, ChatNotFound, BotKicked
+from aiogram.dispatcher.filters import BoundFilter
+from aiogram import Bot
 
 from src.database.channel import get_channels, get_channel_ids
-from src.utils import logger
 from src.keyboards.user import UserKeyboards
+from src.utils import logger
 
 
 class IsSubscriberFilter(BoundFilter):

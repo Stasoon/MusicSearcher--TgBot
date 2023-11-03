@@ -2,6 +2,7 @@ import asyncio
 from aiogram import executor
 from aiogram.types import BotCommand
 
+from src.middlewares.throttling import ThrottlingMiddleware
 from src.utils.update_songs_catalog import run_periodic_catalog_updates
 from src.handlers import register_all_handlers
 from src.filters import register_all_filters
@@ -30,6 +31,7 @@ async def on_startup(_):
 
     # Регистрация middlewares
     dp.middleware.setup(i18n)
+    dp.middleware.setup(ThrottlingMiddleware())
 
     # Регистрация фильтров
     register_all_filters(dp)
@@ -51,9 +53,6 @@ async def on_shutdown(_):
 
 def start_bot():
     try:
-        # loop = asyncio.get_event_loop()
-        # loop.create_task(run_periodic_catalog_updates())
-
         executor.start_polling(dispatcher=dp, on_startup=on_startup, on_shutdown=on_shutdown, skip_updates=True)
     except Exception as e:
         logger.exception(e)

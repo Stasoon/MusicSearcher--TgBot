@@ -6,11 +6,10 @@ from src.messages.user import UserMessages
 
 
 async def handle_not_subscriber_callback(callback: CallbackQuery):
-    await callback.answer()
     user_id = callback.from_user.id
     markup = await IsSubscriberFilter.get_notsubbed_channels_markup_or_none(callback.bot, user_id)
 
-    await callback.message.answer(
+    await callback.message.edit_text(
         text=UserMessages.get_user_must_subscribe(),
         reply_markup=markup,
         parse_mode='HTML'

@@ -1,14 +1,12 @@
 from typing import Literal
 
-from aiogram.types import Message, CallbackQuery, InputFile
-from aiogram.utils.exceptions import NetworkError
+from aiogram.types import Message, CallbackQuery
 from aiogram import Dispatcher
 
-from src.misc.callback_data import SongsNavigationCallback, ShowSongCallback, LanguageChoiceCallback
-from src.database import users, songs_hashes, saved_songs
+from src.misc.callback_data import SongsNavigationCallback, LanguageChoiceCallback
+from src.database import users, saved_songs
 from src.keyboards.user import UserKeyboards
 from src.messages.user import UserMessages
-from src.filters import IsSubscriberFilter
 from src.utils.vk_music_api import VkMusicApi
 from src.utils.vkpymusic import VkSong
 from config import i18n
@@ -17,13 +15,6 @@ from config import i18n
 # region Utils
 
 __ = i18n.lazy_gettext
-
-
-def __get_song_file(song: VkSong) -> InputFile | str:
-    file_id = songs_hashes.get_song_file_id(song_id=song.song_id, owner_id=song.owner_id)
-
-    if file_id: return file_id
-    return InputFile.from_url(url=song.url, filename=song.title)
 
 
 def calculate_page_to_show_number(callback_data: SongsNavigationCallback) -> int:
@@ -37,15 +28,6 @@ def calculate_page_to_show_number(callback_data: SongsNavigationCallback) -> int
     elif action == 'prev':
         page_to_show_num = (current_page_num - 1) if current_page_num > 1 else max_pages
     return page_to_show_num
-
-
-async def send_audio_message(callback, song, file, cover) -> Message:
-    bot_username = (await callback.bot.get_me()).username
-    audio_message = await callback.message.answer_audio(
-        audio=file, title=song.title, performer=song.artist, thumb=cover,
-        caption=UserMessages.get_audio_file_caption(bot_username=bot_username)
-    )
-    return audio_message
 
 
 async def get_next_page_songs(
@@ -123,27 +105,8 @@ async def handle_songs_navigation_callbacks(callback: CallbackQuery, callback_da
     await callback.message.edit_reply_markup(reply_markup=markup)
 
 
-async def handle_show_song_callback(callback: CallbackQuery, callback_data: ShowSongCallback):
+async def handle_empty_callbacks(callback: CallbackQuery):
     await callback.answer()
-    await callback.bot.send_chat_action(chat_id=callback.from_user.id, action='UPLOAD_VOICE')
-
-    song_id, owner_id = callback_data.get('song_id'), callback_data.get('owner_id')
-    song = await VkMusicApi.get_song_by_id(owner_id=owner_id, song_id=song_id)
-
-    if not song:
-        await callback.message.answer('Произошла ошибка :(')
-        return
-
-    file = __get_song_file(song)
-
-    try:
-        file_msg = await send_audio_message(callback=callback, song=song, file=file, cover=None)
-    except NetworkError:
-        await callback.message.answer(text=UserMessages.get_audiofile_too_huge_error())
-    else:
-        songs_hashes.save_song_if_not_hashed(
-            song_id=song.song_id, owner_id=song.owner_id, file_id=file_msg.audio.file_id
-        )
 
 
 # endregion
@@ -160,9 +123,4 @@ def register_navigation_handlers(dp: Dispatcher):
 
     # Навигация по страницам с песнями
     dp.register_callback_query_handler(handle_songs_navigation_callbacks, SongsNavigationCallback.filter())
-
-    # Показать песню (если подписан)
-    dp.register_callback_query_handler(
-        handle_show_song_callback, ShowSongCallback.filter(),
-        IsSubscriberFilter(should_be_subscriber=True)
-    )
+    dp.register_callback_query_handler(handle_empty_callbacks, lambda callback: callback.data == '*')

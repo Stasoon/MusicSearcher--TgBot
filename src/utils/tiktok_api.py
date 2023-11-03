@@ -1,25 +1,30 @@
-# # from .pyktok import save_tiktok
-# from aiotiktok import Client
-#
-#
-# async def get_video(url: str):
-#     # save_tiktok(video_url=url, browser_name='chrome')
-#     # print('finish')
-#     tiktok = Client()
-#     try:
-#         data = await tiktok.video_data(url=url)
-#     except Exception as e:
-#         print('Error!', e)
-#     else:
-#         print("video data: ", data)
+import aiohttp
+from bs4 import BeautifulSoup
 
 
-# from tiktokapipy.async_api import AsyncTikTokAPI
-#
-#
-# async def get_video(video_link):
-#     async with AsyncTikTokAPI() as api:
-#         video = await api.video(video_link)
-#     print(video)
-#     return video
+async def get_tiktok_download_link(link):
+    tmate_url = "https://tmate.cc/"
+    headers = {
+        'User-Agent': 'ваш User-Agent',
+    }
 
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.get(tmate_url) as response:
+            if response.status != 200:
+                return
+
+            content = await response.text()
+            soup = BeautifulSoup(content, 'html.parser')
+            token = soup.find("input", {"name": "token"})["value"]
+
+        data = {'url': link, 'token': token}
+
+        async with session.post('https://tmate.cc/download', data=data) as response:
+            if response.status != 200:
+                return
+
+            content = await response.text()
+            soup = BeautifulSoup(content, 'html.parser')
+            download_link = soup.find(class_="downtmate-right is-desktop-only right").find_all("a")[0]["href"]
+
+    return download_link
