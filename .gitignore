@@ -4,5 +4,5 @@ __pycache__
 .env
 .idea
 *.ini
-*.db
+database.db
 vk_config.v2.json

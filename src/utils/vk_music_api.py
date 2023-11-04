@@ -57,10 +57,11 @@ class VkMusicParser:
             song_elements = await page.query_selector_all('.audio_row__inner')
 
             songs = []
+
             for song_element in song_elements:
                 try:
                     song = await cls.__get_song_from_element(song_element)
-                except (TypeError, ValueError) as e:
+                except (TypeError, ValueError):
                     continue
                 songs.append(song)
 

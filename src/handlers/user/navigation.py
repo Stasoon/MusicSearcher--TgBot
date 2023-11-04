@@ -39,7 +39,7 @@ async def get_next_page_songs(
     if category == 'search':
         return await VkMusicApi.get_songs_by_text(text=callback.message.text, count=songs_per_page, offset=offset)
     elif category in ('popular', 'new'):
-        return saved_songs.get_songs_from_catalog(category=category, count=songs_per_page, offset=offset)
+        return song_catalogs.get_songs_from_catalog(category=category, count=songs_per_page, offset=offset)
     return []
 
 
@@ -65,7 +65,7 @@ async def handle_language_choice_callback(callback: CallbackQuery, callback_data
 async def handle_new_songs_button(message: Message):
     await message.answer_chat_action(action='typing')
 
-    songs = saved_songs.get_songs_from_catalog('new', count=8, offset=0)
+    songs = song_catalogs.get_songs_from_catalog('new', count=8, offset=0)
     text = UserMessages.get_new_songs()
     markup = UserKeyboards.get_found_songs(songs, category='new', max_pages=12)
 
@@ -75,7 +75,7 @@ async def handle_new_songs_button(message: Message):
 async def handle_popular_songs_button(message: Message):
     await message.answer_chat_action(action='typing')
 
-    songs = saved_songs.get_songs_from_catalog(category='popular', count=8, offset=0)
+    songs = song_catalogs.get_songs_from_catalog(category='popular', count=8, offset=0)
     text = UserMessages.get_popular_songs()
     markup = UserKeyboards.get_found_songs(songs, category='popular', max_pages=12)
 

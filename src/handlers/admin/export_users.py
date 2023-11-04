@@ -31,17 +31,20 @@ class Utils:
         file_name = Utils.__get_users_csv_filename()
 
         with open(file_name, 'w', newline='', encoding='utf-8-sig') as csv_file:
-            fieldnames = ['telegram_id', 'name', 'registration_timestamp', 'referral_link']
+            fieldnames = [
+                'telegram_id', 'name', 'username', 'language',
+                'registration_timestamp', 'referral_link'
+            ]
             writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
             writer.writeheader()
 
             # Запишите каждую запись из таблицы в CSV файл
             for user in get_all_users():
                 writer.writerow({
+                    'telegram_id': user.telegram_id,
                     'name': user.name,
                     'username': user.username,
                     'language': user.lang_code,
-                    'telegram_id': user.telegram_id,
                     'registration_timestamp': user.registration_timestamp,
                     'referral_link': user.referral_link if user.referral_link else '',
                 })
