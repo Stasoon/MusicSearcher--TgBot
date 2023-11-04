@@ -1,8 +1,27 @@
+from aiogram import Bot
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.exceptions import BadRequest
-from aiogram import Bot
 
+from src.database.advertisements import get_random_ad, increase_counter_and_get_value, reset_counter
 from src.messages.user import UserMessages
+from src.utils.keyboards_utils import get_inline_kb_from_json
+
+
+async def send_advertisement(bot: Bot, user_id: int):
+    """ Отправляет рекламу """
+    count = increase_counter_and_get_value(user_id=user_id)
+    show_ad_every = 4
+    if count < show_ad_every:
+        return
+
+    ad = get_random_ad()
+    if not ad:
+        return
+
+    reset_counter(user_id=user_id)
+    text = ad.text
+    markup = get_inline_kb_from_json(ad.markup_json) if ad.markup_json else None
+    await bot.send_message(chat_id=user_id, text=text, reply_markup=markup, parse_mode='HTML')
 
 
 async def get_media_file_url(bot: Bot, message: Message) -> str | None:
@@ -45,8 +64,8 @@ def send_and_delete_timer():
     return decorator
 
 
-async def send_audio_message(callback, song, file, cover) -> Message:
-    """  """
+async def send_audio_message(callback, song, file, cover=None) -> Message:
+    """ Отправляет аудио-сообщение с музыкой и подписью в ответ на callback запрос. """
     bot_username = (await callback.bot.get_me()).username
     audio_message = await callback.message.answer_audio(
         audio=file, title=song.title, performer=song.artist, thumb=cover,

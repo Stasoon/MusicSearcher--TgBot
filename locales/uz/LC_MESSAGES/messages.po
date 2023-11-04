@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-10-29 12:51+0300\n"
+"POT-Creation-Date: 2023-11-04 15:08+0300\n"
 "PO-Revision-Date: 2023-10-29 10:45+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: uz\n"
@@ -33,6 +33,14 @@ msgstr "🎧 Ommabop"
 #: src/keyboards/user.py:47
 msgid "🔍 Поиск"
 msgstr "🔍 Qidiruv"
+
+#: src/keyboards/user.py:101
+msgid "🎵 Найти песню 🎵"
+msgstr "🎵 Qo'shiqni toping 🎵"
+
+#: src/keyboards/user.py:107
+msgid "🎵 Узнать песню 🎵"
+msgstr "🎵 Qo'shiqni bilib oling 🎵"
 
 #: src/messages/user.py:10
 msgid "👋 Привет, {user_name}!"
@@ -93,6 +101,15 @@ msgid "Песня не найдена 😔🎧"
 msgstr "Qo'shiq topilmadi😔 🎧"
 
 #: src/messages/user.py:69
-msgid "Аудиофайл слишком много весит 😔"
+#, fuzzy
+msgid "Файл слишком много весит 😔"
 msgstr "Audio fayl juda og'ir 😔"
+
+#: src/messages/user.py:73
+msgid "Пожалуйста, не так часто 🙏"
+msgstr "Iltimos, tez-tez emas 🙏"
+
+#: src/messages/user.py:77
+msgid "Вы можете скачать файл по <a href={}>🔗 этой ссылке 🔗</a>"
+msgstr ""
 

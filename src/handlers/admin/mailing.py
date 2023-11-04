@@ -10,6 +10,7 @@ from aiogram.types import KeyboardButton, InlineKeyboardButton, InlineKeyboardMa
 from src.misc.admin_states import MailingPostCreating
 from src.database.users import get_user_ids, get_users_total_count
 from src.utils import logger
+from src.utils.keyboards_utils import get_markup_from_text
 
 
 class Keyboards:
@@ -24,25 +25,6 @@ class Keyboards:
     confirm_mailing_markup = InlineKeyboardMarkup(row_width=1).add(
         InlineKeyboardButton('❗ Начать рассылку ❗', callback_data='start_mailing'),
         cancel_button)
-
-    @staticmethod
-    def get_markup_from_text(text: str) -> InlineKeyboardMarkup:
-        markup = InlineKeyboardMarkup()  # По умолчанию - 1 кнопка в ряду
-
-        # Разбиваем текст на строки и обрабатываем каждую строку
-        lines = text.split('\n')
-        for line in lines:
-            items = line.strip().split('|')
-            row_buttons = []
-            for item in items:
-                item_parts = item.strip().split()
-                title = ' '.join(item_parts[:-1])  # Берем все слова, кроме последнего, как текст кнопки
-                url = item_parts[-1]  # Последнее слово в строке считаем ссылкой
-                button = InlineKeyboardButton(text=title, url=url)
-                row_buttons.append(button)
-
-            markup.row(*row_buttons)
-        return markup
 
 
 class Messages:
@@ -139,11 +121,11 @@ class Handlers:
             disable_web_page_preview=True
         )
 
-        await state.set_state(MailingPostCreating.wait_for_button_data)
+        await state.set_state(MailingPostCreating.wait_for_markup_data)
 
     @staticmethod
     async def __handle_url_button_data(message: Message, state: FSMContext):
-        markup = Keyboards.get_markup_from_text(message.text)
+        markup = get_markup_from_text(message.text)
 
         await message.answer(Messages.prepare_post())
 
@@ -223,13 +205,13 @@ class Handlers:
         dp.register_message_handler(
             cls.__handle_url_button_data,
             content_types=['text'],
-            state=MailingPostCreating.wait_for_button_data
+            state=MailingPostCreating.wait_for_markup_data
         )
 
         # обработка калбэка продолжения без url-кнопки
         dp.register_callback_query_handler(
             cls.__handle_continue_wout_button_callback,
-            state=MailingPostCreating.wait_for_button_data
+            state=MailingPostCreating.wait_for_markup_data
         )
 
         # обработка калбэка подтверждения (начала) рассылки

@@ -6,7 +6,7 @@ from aiogram import Dispatcher
 from aiogram.types import KeyboardButton, Message
 
 from src.database.users import get_all_users
-from config import Config
+from config import PathsConfig
 
 
 class Keyboards:
@@ -16,11 +16,11 @@ class Keyboards:
 class Utils:
     @staticmethod
     def __get_users_csv_filename() -> str:
-        if not os.path.exists(Config.CSV_FOLDER):
-            os.mkdir(Config.CSV_FOLDER)
+        if not os.path.exists(PathsConfig.CSV_FOLDER):
+            os.mkdir(PathsConfig.CSV_FOLDER)
 
         date = datetime.now().strftime("%Y.%m.%d")
-        file_name = f"{Config.CSV_FOLDER}/Пользователи {date}.csv"
+        file_name = f"{PathsConfig.CSV_FOLDER}/Пользователи {date}.csv"
         if os.path.exists(file_name):
             os.remove(file_name)
 
@@ -39,6 +39,8 @@ class Utils:
             for user in get_all_users():
                 writer.writerow({
                     'name': user.name,
+                    'username': user.username,
+                    'language': user.lang_code,
                     'telegram_id': user.telegram_id,
                     'registration_timestamp': user.registration_timestamp,
                     'referral_link': user.referral_link if user.referral_link else '',

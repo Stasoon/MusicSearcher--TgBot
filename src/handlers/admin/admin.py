@@ -7,6 +7,7 @@ from . import necessary_subscriptions
 from . import refferal_links
 from . import export_users
 from . import admins_management
+from . import edit_ads
 
 
 admin_kb = ReplyKeyboardMarkup(
@@ -15,6 +16,7 @@ admin_kb = ReplyKeyboardMarkup(
     statistic.Keyboards.reply_button_for_admin_menu,
     mailing.Keyboards.reply_button_for_admin_menu,
     necessary_subscriptions.Keyboards.reply_button_for_admin_menu,
+    edit_ads.Keyboards.reply_button_for_admin_menu,
     refferal_links.Keyboards.reply_button_for_admin_menu,
     admins_management.Keyboards.reply_button_for_admin_menu,
     export_users.Keyboards.reply_button_for_admin_menu
@@ -38,3 +40,4 @@ def register_admin_handlers(dp: Dispatcher):
     refferal_links.Handlers.register_reflinks_handlers(dp)
     admins_management.Handlers.register_admin_management_handlers(dp)
     export_users.Handlers.register_export_users_handlers(dp)
+    edit_ads.Handlers.register_edit_ads_handlers(dp)

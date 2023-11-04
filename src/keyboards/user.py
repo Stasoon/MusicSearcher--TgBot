@@ -98,11 +98,11 @@ class UserKeyboards:
     @staticmethod
     def get_(bot_username: str) -> InlineKeyboardMarkup:
         markup = InlineKeyboardMarkup(row_width=1)
-        markup.add(InlineKeyboardButton(url=f'https://t.me/{bot_username}', text='🎵 Найти песню 🎵'))
+        markup.add(InlineKeyboardButton(url=f'https://t.me/{bot_username}', text=_('🎵 Найти песню 🎵')))
         return markup
 
     @staticmethod
     def get_recognize_song_from_video_button() -> InlineKeyboardMarkup:
         markup = InlineKeyboardMarkup(row_width=1)
-        markup.add(InlineKeyboardButton(text='🎵 Узнать песню 🎵', callback_data='recognize_song_from_video'))
+        markup.add(InlineKeyboardButton(text=_('🎵 Узнать песню 🎵'), callback_data='recognize_song_from_video'))
         return markup

@@ -1,7 +1,7 @@
 from aiogram import Dispatcher
 from aiogram.types import Message
 
-from src.database import create_user
+from src.database.users import create_user
 from src.keyboards.user import UserKeyboards
 from src.messages.user import UserMessages
 

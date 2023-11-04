@@ -2,16 +2,16 @@ from aiogram.utils.exceptions import NetworkError, FileIsTooBig
 from aiogram.types import Message, InputFile, CallbackQuery
 from aiogram import Dispatcher
 
-from src.utils.message_utils import send_audio_message, send_and_delete_timer, get_media_file_url
+from src.utils.message_utils import send_audio_message, send_and_delete_timer, get_media_file_url, send_advertisement
 from src.misc.callback_data import ShowSongCallback
 from src.middlewares.throttling import rate_limit
-from src.utils.vk_music_api import VkMusicApi
 from src.keyboards.user import UserKeyboards
 from src.filters import IsSubscriberFilter
 from src.messages.user import UserMessages
+from src.utils.vk_music_api import VkMusicApi
 from src.utils import shazam_api, VkSong
-from src.database import songs_hashes
 from src.utils import tiktok_api
+from src.database import songs_hashes
 
 
 def get_song_file(song: VkSong) -> InputFile | str:
@@ -69,7 +69,7 @@ async def handle_recognize_song_from_downloaded_video_callback(callback: Callbac
 
 async def handle_youtube_link(message: Message):
     await message.answer_chat_action(action='typing')
-    await message.answer('К сожалению, я пока что не умею обрабатывать ссылки на ютуб 😟')
+    await message.answer('К сожалению, пока что я не умею обрабатывать ссылки на ютуб 😟')
 
 
 @rate_limit(limit=2, key='show_song')
@@ -105,6 +105,8 @@ async def handle_show_song_callback(callback: CallbackQuery, callback_data: Show
         songs_hashes.save_song_if_not_hashed(
             song_id=song.song_id, owner_id=song.owner_id, file_id=file_msg.audio.file_id
         )
+    finally:
+        await send_advertisement(callback.bot, callback.from_user.id)
 
 
 # endregion

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-10-29 12:51+0300\n"
+"POT-Creation-Date: 2023-11-04 15:08+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,6 +31,14 @@ msgstr ""
 
 #: src/keyboards/user.py:47
 msgid "🔍 Поиск"
+msgstr ""
+
+#: src/keyboards/user.py:101
+msgid "🎵 Найти песню 🎵"
+msgstr ""
+
+#: src/keyboards/user.py:107
+msgid "🎵 Узнать песню 🎵"
 msgstr ""
 
 #: src/messages/user.py:10
@@ -81,6 +89,14 @@ msgid "Песня не найдена 😔🎧"
 msgstr ""
 
 #: src/messages/user.py:69
-msgid "Аудиофайл слишком много весит 😔"
+msgid "Файл слишком много весит 😔"
+msgstr ""
+
+#: src/messages/user.py:73
+msgid "Пожалуйста, не так часто 🙏"
+msgstr ""
+
+#: src/messages/user.py:77
+msgid "Вы можете скачать файл по <a href={}>🔗 этой ссылке 🔗</a>"
 msgstr ""
 

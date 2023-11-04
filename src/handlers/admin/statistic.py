@@ -5,6 +5,7 @@ from aiogram.utils.callback_data import CallbackData
 
 from src.misc.admin_states import StatsGetting
 from src.database.users import get_users_total_count, get_users_registered_within_hours_count
+from src.database.songs_hashes import get_hashed_songs_count
 
 
 statistic_callback_data = CallbackData('statistic', 'value')
@@ -42,7 +43,10 @@ class Messages:
 
     @staticmethod
     def get_menu():
-        return '📊 Выберите, за какой промежуток времени просмотреть статистику:'
+        return (
+            f'🎵 Песен в хэше: {get_hashed_songs_count()} \n\n'
+            '📊 Выберите, за какой промежуток времени просмотреть статистику:'
+        )
 
     @staticmethod
     def get_count_per_hours(time_word: str, hours: int):
@@ -52,7 +56,7 @@ class Messages:
 class Handlers:
     @staticmethod
     async def __handle_admin_statistic_button(message: Message):
-        await message.answer(Messages.get_menu(), reply_markup=Keyboards.menu_markup)
+        await message.answer(text=Messages.get_menu(), reply_markup=Keyboards.menu_markup)
 
     @staticmethod
     async def __handle_show_stats_callback(callback: CallbackQuery, state: FSMContext,

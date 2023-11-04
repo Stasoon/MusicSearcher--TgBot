@@ -4,7 +4,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram import Dispatcher
 
 from src.misc.callback_data import SongsNavigationCallback, LanguageChoiceCallback
-from src.database import users, saved_songs
+from src.database import users, song_catalogs
 from src.keyboards.user import UserKeyboards
 from src.messages.user import UserMessages
 from src.utils.vk_music_api import VkMusicApi

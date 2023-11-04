@@ -8,7 +8,7 @@ from babel.support import LazyProxy
 from aiogram import types
 from aiogram.dispatcher.middlewares import BaseMiddleware
 
-from src.database.users import get_user_lang_code
+from src.database.users import get_user_lang_code, update_user_lang_code
 
 
 class I18nMiddleware(BaseMiddleware):
@@ -147,9 +147,11 @@ class I18nMiddleware(BaseMiddleware):
         if locale and locale.language in self.locales:
             *_, data = args
             language = data['locale'] = locale.language
+            update_user_lang_code(telegram_id=user.id, new_lang_code=language)
             return language
 
         # Иначе ставим дефолтный
+        update_user_lang_code(telegram_id=user.id, new_lang_code=self.default)
         return self.default
 
     async def trigger(self, action, args):
@@ -161,9 +163,9 @@ class I18nMiddleware(BaseMiddleware):
         :return:
         """
         if (
-                'update' not in action
-                and 'error' not in action
-                and action.startswith('pre_process')
+            'update' not in action
+            and 'error' not in action
+            and action.startswith('pre_process')
         ):
             locale = await self.get_user_locale(action, args)
             self.change_locale_context(locale)

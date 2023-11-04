@@ -17,34 +17,16 @@ class AdminAdding(StatesGroup):
 
 class MailingPostCreating(StatesGroup):
     wait_for_content_message = State()
-    wait_for_button_data = State()
+    wait_for_markup_data = State()
     wait_for_confirm = State()
 
 
-class HentaiStates(StatesGroup):
-    wait_for_code = State()
-    wait_for_title = State()
-    wait_for_description = State()
-    wait_for_url = State()
-    wait_for_photo = State()
-    wait_for_code_to_delete = State()
+class AdvertisementEditing(StatesGroup):
+    wait_for_content_message = State()
+    wait_for_markup_data = State()
 
 
 class ReferralLinkStates(StatesGroup):
     create = State()
     delete = State()
     find = State()
-
-
-class ContentEditingStates:
-    class Specialists(StatesGroup):
-        enter_content = State()
-
-    class Bots(StatesGroup):
-        enter_content = State()
-
-    class Blogs(StatesGroup):
-        enter_content = State()
-
-    class AdminChats(StatesGroup):
-        enter_content = State()

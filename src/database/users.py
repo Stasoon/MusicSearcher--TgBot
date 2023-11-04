@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Generator
 
+from peewee import DoesNotExist
+
 from .models import User
 from .reflinks import increase_users_count
 
@@ -34,7 +36,8 @@ def get_users_registered_within_hours_count(hours: int) -> int:
 
 def get_user_lang_code(telegram_id: int) -> str | None:
     user = get_user_by_telegram_id_or_none(telegram_id)
-    return user.lang_code if user else None
+    lang_code = user.lang_code if user else None
+    return lang_code
 
 
 def get_user_ids() -> Generator[int, any, any]:
@@ -47,7 +50,11 @@ def get_all_users() -> Generator[User, any, any]:
 
 
 def get_user_by_telegram_id_or_none(telegram_id: int) -> User | None:
-    return User.get_or_none(User.telegram_id == telegram_id)
+    try:
+        user = User.get(User.telegram_id == telegram_id)
+        return user
+    except DoesNotExist:
+        return None
 
 # endregion
 
