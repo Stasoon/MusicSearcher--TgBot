@@ -54,6 +54,10 @@ class VkMusicParser:
             await page.goto(f"{cls.BASE_URL}?block={block_name}")
             await page.wait_for_selector('.audio_row__inner')
 
+            footer = await page.wait_for_selector('.footer_wrap')
+            await footer.scroll_into_view_if_needed()
+            await page.wait_for_timeout(2000)
+
             song_elements = await page.query_selector_all('.audio_row__inner')
 
             songs = []
