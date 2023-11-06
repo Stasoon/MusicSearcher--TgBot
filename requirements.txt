@@ -4,7 +4,6 @@ Babel==2.9.1
 beautifulsoup4==4.12.2
 loguru==0.7.2
 peewee==3.17.0
-psycopg2==2.9.9
 playwright==1.39.0
 python-dotenv==1.0.0
 pytube==15.0.0

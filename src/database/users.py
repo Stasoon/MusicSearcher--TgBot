@@ -56,6 +56,17 @@ def get_user_by_telegram_id_or_none(telegram_id: int) -> User | None:
     except DoesNotExist:
         return None
 
+
+def get_users_languages() -> list[str]:
+    unique_lang_codes = User.select(User.lang_code).distinct()
+    unique_lang_codes = [lang_code.lang_code for lang_code in unique_lang_codes]
+    return unique_lang_codes
+
+
+def get_users_count_by_language(lang_code: str) -> int:
+    return User.select().where(User.lang_code == lang_code).count()
+
+
 # endregion
 
 
@@ -67,5 +78,6 @@ def update_user_lang_code(telegram_id: int, new_lang_code: str = 'ru') -> None:
 
     user.lang_code = new_lang_code
     user.save()
+
 
 # endregion

@@ -1,8 +1,2 @@
-venv
-.venv
 __pycache__
-.env
-.idea
 *.ini
-database.db
-vk_config.v2.json

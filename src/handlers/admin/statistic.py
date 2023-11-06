@@ -4,11 +4,18 @@ from aiogram.types import KeyboardButton, InlineKeyboardButton, InlineKeyboardMa
 from aiogram.utils.callback_data import CallbackData
 
 from src.misc.admin_states import StatsGetting
-from src.database.users import get_users_total_count, get_users_registered_within_hours_count
+from src.database import users
 from src.database.songs_hashes import get_hashed_songs_count
 
 
 statistic_callback_data = CallbackData('statistic', 'value')
+
+language_emoji_map = {
+    'ru': '🇷🇺',
+    'uk': '🇺🇦',
+    'uz': '🇺🇿',
+    'en': '🇬🇧'
+}
 
 
 class Keyboards:
@@ -33,7 +40,7 @@ class Messages:
     @staticmethod
     def get_statistic_info(key: str) -> str:
         return {
-            'all_time': f'Всего пользовалось ботом: <b>{get_users_total_count()} юзеров</b>',
+            'all_time': f'Всего пользовалось ботом: <b>{users.get_users_total_count()} юзеров</b>',
             'month': Messages.get_count_per_hours('месяц', 30 * 24),
             'week': Messages.get_count_per_hours('неделю', 7 * 24),
             'day': Messages.get_count_per_hours('сутки', 24),
@@ -43,14 +50,22 @@ class Messages:
 
     @staticmethod
     def get_menu():
-        return (
-            f'🎵 Песен в хэше: {get_hashed_songs_count()} \n\n'
-            '📊 Выберите, за какой промежуток времени просмотреть статистику:'
+        languages = users.get_users_languages()
+        text = f'📊 Статистика \n\n' \
+               f'🎵 Песен в хэше: {get_hashed_songs_count()} \n' \
+               f'👥 Всего: {users.get_users_total_count()} \n'
+
+        text += ' | '.join(
+            [f"{language_emoji_map.get(lang)} {users.get_users_count_by_language(lang)}"
+             for lang in languages]
         )
+
+        return text + f' \n\n📊 Выберите, за какой промежуток времени просмотреть статистику:'
 
     @staticmethod
     def get_count_per_hours(time_word: str, hours: int):
-        return f'За {time_word} в бота пришли: \n<b>{get_users_registered_within_hours_count(hours)} юзера(ов)</b>'
+        return f'За {time_word} в бота пришли: \n' \
+               f'<b>{users.get_users_registered_within_hours_count(hours)} юзера(ов)</b>'
 
 
 class Handlers:
@@ -81,7 +96,7 @@ class Handlers:
             await message.answer('❗Вы ввели не число. Попробуйте снова:', reply_markup=Keyboards.back_markup)
             return
 
-        users_count = get_users_registered_within_hours_count(int(message.text))
+        users_count = users.get_users_registered_within_hours_count(int(message.text))
         await message.answer(
             text=Messages.get_count_per_hours(f'{message.text} часов', users_count),
             reply_markup=Keyboards.back_markup

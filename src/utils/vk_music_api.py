@@ -8,12 +8,12 @@ class VkMusicApi:
 
     @classmethod
     def authorise(cls, login: str, password: str):
-        # AsyncService.del_config()
-        # token_receiver = TokenReceiver(login=login, password=password)
-        #
-        # if token_receiver.auth():
-        #     token_receiver.get_token()
-        #     token_receiver.save_to_config()
+        AsyncService.del_config()
+        token_receiver = TokenReceiver(login=login, password=password)
+
+        if token_receiver.auth():
+            token_receiver.get_token()
+            token_receiver.save_to_config()
 
         cls.service = AsyncService.parse_config()
 

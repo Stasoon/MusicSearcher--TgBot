@@ -78,12 +78,6 @@ class AsyncService:
     ##############
     # ANY REQUESTS
 
-    # async def __getCount(self, user_id: int) -> dict:
-    #     params = [
-    #         ("owner_id", user_id),
-    #     ]
-    #     return await self.__get_response_content("getCount", params)
-
     async def __get(
         self,
         user_id: int,

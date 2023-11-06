@@ -23,11 +23,11 @@ async def recognize_song(file_url: str) -> TrackInfo:
     return song
 
 
-async def get_top_tracks_names(
-        country: Literal['RU'] = 'RU',
-        count: int = 10,
-        offset: int = 0
-):
-    shazam = Shazam()
-    top_songs = await shazam.top_country_tracks(country_code=country, limit=count, offset=offset)
-    return (f"{song.get('title')} {song.get('subtitle')}" for song in top_songs['tracks'])
+# async def get_top_tracks_names(
+#         country: Literal['RU'] = 'RU',
+#         count: int = 10,
+#         offset: int = 0
+# ):
+#     shazam = Shazam()
+#     top_songs = await shazam.top_country_tracks(country_code=country, limit=count, offset=offset)
+#     return (f"{song.get('title')} {song.get('subtitle')}" for song in top_songs['tracks'])
