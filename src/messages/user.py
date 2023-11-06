@@ -57,7 +57,7 @@ class UserMessages:
 
     @staticmethod
     def get_audio_file_caption(bot_username: str) -> str:
-        return '<b><a href="https://t.me/{bot_username}">👉 <u>Найти музыку</u> 🎧</a></b>'\
+        return '<b><a href="https://t.me/{bot_username}">Ꮋᴀйᴛи ᴄʙᴏй ᴧюбиʍый ᴛᴩᴇᴋ</a></b>'\
             .format(bot_username=bot_username)
 
     @staticmethod

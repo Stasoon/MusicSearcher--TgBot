@@ -1,6 +1,7 @@
 from aiogram import Dispatcher
 from aiogram.types import CallbackQuery
 
+from src.database.reflinks import increase_op_count
 from src.filters import IsSubscriberFilter
 from src.messages.user import UserMessages
 
@@ -22,6 +23,7 @@ async def handle_user_subscribed_callback(callback: CallbackQuery):
 
     if not markup:
         await callback.answer(text=UserMessages.get_user_subscribed(), show_alert=True)
+        increase_op_count(callback.from_user.id)
         await message.delete()
     else:
         await callback.answer(text=UserMessages.get_not_all_channels_subscribed(), show_alert=True)

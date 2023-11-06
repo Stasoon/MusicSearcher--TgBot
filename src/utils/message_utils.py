@@ -21,7 +21,7 @@ async def send_advertisement(bot: Bot, user_id: int):
     reset_counter(user_id=user_id)
     text = ad.text
     markup = get_inline_kb_from_json(ad.markup_json) if ad.markup_json else None
-    await bot.send_message(chat_id=user_id, text=text, reply_markup=markup, parse_mode='HTML')
+    await bot.send_message(chat_id=user_id, text=text, reply_markup=markup, disable_web_page_preview=True, parse_mode='HTML')
 
 
 async def get_media_file_url(bot: Bot, message: Message) -> str | None:

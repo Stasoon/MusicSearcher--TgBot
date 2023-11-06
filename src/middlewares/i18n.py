@@ -26,7 +26,7 @@ class I18nMiddleware(BaseMiddleware):
 
     ctx_locale = ContextVar('ctx_user_locale', default=None)
 
-    def __init__(self, domain, path=None, default='en'):
+    def __init__(self, domain, path=None, default='ru'):
         """
         :param domain: domain
         :param path: path where located all *.mo files
