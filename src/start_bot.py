@@ -40,7 +40,10 @@ async def on_startup(_):
     register_all_handlers(dp)
 
     # Авторизация в ВК
-    VkMusicApi.authorise(login=Config.VK_LOGIN, password=Config.VK_PASSWD)
+    vk_api = VkMusicApi()
+    vk_api.add_service(client_name='Stas')#, login='+79782128315', password='[ST1920ii9As/]')
+    # vk_api.add_service(client_name='Misha')  # , login='+79781685372', password='.barN15sVA/')
+    vk_api.add_service(client_name='Alex')#, login='+79259675328', password='StAs123456')
 
     asyncio.create_task(run_periodic_catalog_updates())
 

@@ -37,7 +37,7 @@ async def get_next_page_songs(
         offset: int
 ) -> list[VkSong]:
     if category == 'search':
-        return await VkMusicApi.get_songs_by_text(text=callback.message.text, count=songs_per_page, offset=offset)
+        return await VkMusicApi().get_songs_by_text(text=callback.message.text, count=songs_per_page, offset=offset)
     elif category in ('popular', 'new'):
         return song_catalogs.get_songs_from_catalog(category=category, count=songs_per_page, offset=offset)
     return []

@@ -1,31 +1,68 @@
+import asyncio
+from cachetools import TTLCache
+
 from playwright.async_api import async_playwright
 
-from src.utils.vkpymusic import AsyncService, TokenReceiver, VkSong
+from src.utils.vkpymusic import AsyncService, VkSong
 
 
 class VkMusicApi:
-    service: AsyncService = None
+    __instance = None
+    services: dict[str, AsyncService] = {}
+    service_cache = TTLCache(maxsize=50, ttl=4)
 
-    @classmethod
-    def authorise(cls, login: str, password: str):
-        AsyncService.del_config()
-        token_receiver = TokenReceiver(login=login, password=password)
+    def __new__(cls):
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
+        return cls.__instance
 
-        if token_receiver.auth():
-            token_receiver.get_token()
-            token_receiver.save_to_config()
+    def __del__(self):
+        VkMusicApi.__instance = None
 
-        cls.service = AsyncService.parse_config()
+    def add_service(self, client_name: str):
+        # AsyncService.del_config()
+        # token_receiver = TokenReceiver(client=client_name, login=login, password=password)
+        #
+        # if token_receiver.auth():
+        #     token_receiver.get_token()
+        #     token_receiver.save_to_config(f'{client_name}.ini')
 
-    @classmethod
-    async def get_songs_by_text(cls, text: str, count: int = 10, offset: int = 0) -> list[VkSong]:
-        songs = await cls.service.search_songs_by_text(text=text, count=count, offset=offset)
+        new_service = AsyncService.parse_config(f'{client_name}.ini')
+        self.services[client_name] = new_service
+
+    async def get_available_service(self) -> AsyncService:
+        while True:
+            # Неиспользованные сервисы
+            not_used = [service_name for service_name in self.services if service_name not in self.service_cache]
+            # Сервисы, в которых нет превышения лимита
+            not_exceeded = [ser for ser in self.service_cache.keys() if self.service_cache.get(ser) < 3]
+            available_services = not_used + not_exceeded
+
+            # Если нет доступных сервисов, ждём пол секунды и пробуем снова
+            if not available_services:
+                await asyncio.sleep(1)
+                continue
+            # Если есть неиспользованные сервисы, берём первый из них
+            if not_used:
+                service_name = not_used[0]
+                self.service_cache[service_name] = 0
+            # Иначе берём наименее загруженный
+            else:
+                service_name = min(not_exceeded, key=self.service_cache.get)
+
+            service = self.services[service_name]
+            self.service_cache[service_name] += 1
+            return service
+
+    async def get_songs_by_text(self, text: str, count: int = 10, offset: int = 0) -> list[VkSong]:
+        service = await self.get_available_service()
+        songs = await service.search_songs_by_text(text=text, count=count, offset=offset)
         return songs
 
-    @classmethod
-    async def get_song_by_id(cls, owner_id: int, song_id: int) -> VkSong:
+    async def get_song_by_id(self, owner_id: int, song_id: int) -> VkSong:
         """ Получает песню из VK """
-        song = await cls.service.get_song_by_id(owner_id=owner_id, audio_id=song_id)
+        service = await self.get_available_service()
+        song = await service.get_song_by_id(owner_id=owner_id, audio_id=song_id)
         return song
 
 

@@ -1,5 +1,6 @@
-import configparser
 import os
+import random
+import configparser
 
 import aiohttp
 from loguru import logger
@@ -8,9 +9,20 @@ from .VkSong import VkSong
 
 
 class AsyncService:
-    def __init__(self, user_agent: str, token: str):
-        self.user_agent = user_agent
+    def __init__(self, token: str):
         self.__token = token
+
+    @property
+    def user_agent(self) -> str:
+        agents = (
+        'KateMobileAndroid/56 lite-460 (Android 4.4.2; SDK 19; x86; unknown Android SDK built for x86; en)',
+        'KateMobileAndroid/56 lite-460 (Android 6.0; SDK 23; x86; unknown Android SDK built for x86; ru)',
+        'KateMobileAndroid/56 (Android 9.2; SDK 22; x86; unknown Android SDK built for x64; fr)',
+        'KateMobileAndroid/56 lite-640 (iOS 17; SDK 20; x64; unknown Android SDK built for x64; ru)',
+        'KateMobileAndroid/56 (iOS 18; SDK 20; x64; unknown Android SDK built for x64; fr)',
+        'KateMobileAndroid/56 lite-460 (iOS 15; SDK 20; x64; unknown Android SDK built for x86; en)',
+        )
+        return random.choice(agents)
 
     @classmethod
     def parse_config(cls, filename: str = "config_vk.ini"):
@@ -26,11 +38,9 @@ class AsyncService:
         try:
             config = configparser.ConfigParser()
             config.read(configfile_path, encoding="utf-8")
-
-            user_agent = config["VK"]["user_agent"]
             token = config["VK"]["token_for_audio"]
 
-            return AsyncService(user_agent, token)
+            return AsyncService(token=token)
         except Exception as e:
             logger.warning(e)
 

@@ -50,7 +50,7 @@ class SongHash(_BaseModel):
     class Meta:
         db_table = 'songs_hashes'
 
-    song_id = BigIntegerField(unique=True)
+    song_id = BigIntegerField()
     owner_id = BigIntegerField()
     file_id = CharField(max_length=150, unique=True)
 

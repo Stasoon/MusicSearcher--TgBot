@@ -29,7 +29,7 @@ async def __send_recognized_song(message: Message, file_url: str):
         await message.answer(text=UserMessages.get_song_not_found_error(), parse_mode='HTML')
         return
 
-    songs = await VkMusicApi.get_songs_by_text(text=f'{song_data.title} {song_data.subtitle}', count=5)
+    songs = await VkMusicApi().get_songs_by_text(text=f'{song_data.title} {song_data.subtitle}', count=5)
     markup = UserKeyboards.get_found_songs(songs, current_page_num=1, append_navigation=False)
     text = UserMessages.get_song_info(song_title=song_data.title, author_name=song_data.subtitle)
 
@@ -41,7 +41,7 @@ async def __send_recognized_song(message: Message, file_url: str):
 @rate_limit(limit=1, key='search_by_text')
 async def handle_text_message(message: Message):
     await message.answer_chat_action(action='typing')
-    songs = await VkMusicApi.get_songs_by_text(text=message.text, count=8)
+    songs = await VkMusicApi().get_songs_by_text(text=message.text, count=8)
 
     if not songs:
         await message.answer(text=UserMessages.get_song_not_found_error(), parse_mode='HTML')
@@ -89,7 +89,7 @@ async def handle_show_song_callback(callback: CallbackQuery, callback_data: Show
     await callback.bot.send_chat_action(chat_id=callback.from_user.id, action='UPLOAD_VOICE')
 
     song_id, owner_id = callback_data.get('song_id'), callback_data.get('owner_id')
-    song = await VkMusicApi.get_song_by_id(owner_id=owner_id, song_id=song_id)
+    song = await VkMusicApi().get_song_by_id(owner_id=owner_id, song_id=song_id)
 
     if not song:
         await callback.message.answer(UserMessages.get_song_not_found_error())

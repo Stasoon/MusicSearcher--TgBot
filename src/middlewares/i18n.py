@@ -137,6 +137,9 @@ class I18nMiddleware(BaseMiddleware):
         """
         user: Optional[types.User] = types.User.get_current()
 
+        if not user or not user.id:
+            return self.default
+
         # Если язык сохранён в БД, используем его
         lang_code = get_user_lang_code(user.id)
         if lang_code and lang_code in self.available_locales:
