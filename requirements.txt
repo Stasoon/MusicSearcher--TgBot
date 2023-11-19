@@ -2,11 +2,12 @@ aiogram==2.25.2
 aiohttp==3.8.6
 Babel==2.9.1
 beautifulsoup4==4.12.2
+cachetools==5.3.2
 loguru==0.7.2
 peewee==3.17.0
 playwright==1.39.0
 python-dotenv==1.0.0
 pytube==15.0.0
+redis==5.0.1
 Requests==2.31.0
 shazamio==0.4.0.1
-cachetools==5.3.2

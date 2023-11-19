@@ -1,7 +1,8 @@
 from peewee import (
     Model, PostgresqlDatabase, AutoField,
     SmallIntegerField, BigIntegerField, IntegerField,
-    DateTimeField, CharField, TextField, BooleanField
+    DateTimeField, CharField, TextField, BooleanField,
+    ForeignKeyField
 )
 from config import DatabaseConfig
 
@@ -21,7 +22,6 @@ class _BaseModel(Model):
 class User(_BaseModel):
     class Meta:
         db_table = 'users'
-
     telegram_id = BigIntegerField(primary_key=True, unique=True, null=False)
     name = CharField(default='Пользователь')
     username = CharField(null=True, default='Пользователь')
@@ -38,7 +38,6 @@ class AdShowCounter(_BaseModel):
 class Advertisement(_BaseModel):
     class Meta:
         db_table = 'advertisements'
-
     id = AutoField(primary_key=True)
     text = TextField()
     markup_json = TextField(null=True)
@@ -49,7 +48,6 @@ class Advertisement(_BaseModel):
 class SongHash(_BaseModel):
     class Meta:
         db_table = 'songs_hashes'
-
     song_id = BigIntegerField()
     owner_id = BigIntegerField()
     file_id = CharField(max_length=150, unique=True)
@@ -58,7 +56,6 @@ class SongHash(_BaseModel):
 class ReferralLink(_BaseModel):
     class Meta:
         db_table = 'referral_links'
-
     name = CharField(unique=True)
     user_count = IntegerField(default=0)
     passed_op_count = IntegerField(default=0)
@@ -67,7 +64,6 @@ class ReferralLink(_BaseModel):
 class Admin(_BaseModel):
     class Meta:
         db_table = 'admins'
-
     telegram_id = BigIntegerField(unique=True, null=False)
     name = CharField()
 
@@ -75,7 +71,6 @@ class Admin(_BaseModel):
 class Channel(_BaseModel):
     class Meta:
         db_table = 'channels'
-
     channel_id = BigIntegerField()
     title = CharField()
     url = CharField()
@@ -84,7 +79,6 @@ class Channel(_BaseModel):
 class PopularSongsCatalog(_BaseModel):
     class Meta:
         db_table = 'popular_songs_catalog'
-
     owner_id = BigIntegerField()
     song_id = BigIntegerField()
     title = CharField()
@@ -95,12 +89,21 @@ class PopularSongsCatalog(_BaseModel):
 class NewSongsCatalog(_BaseModel):
     class Meta:
         db_table = 'new_songs_catalog'
-
     owner_id = BigIntegerField()
     song_id = BigIntegerField()
     title = CharField()
     artist = CharField()
     duration = SmallIntegerField()
+
+
+class VkProfile(_BaseModel):
+    id = BigIntegerField(primary_key=True, unique=True)
+    name = CharField(max_length=300)
+
+
+class UserVkProfileRelation(_BaseModel):
+    user = ForeignKeyField(User)
+    vk_profile = ForeignKeyField(VkProfile)
 
 
 def register_models() -> None:

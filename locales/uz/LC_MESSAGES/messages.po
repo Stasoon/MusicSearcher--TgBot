@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-11-04 15:08+0300\n"
+"POT-Creation-Date: 2023-11-19 18:19+0300\n"
 "PO-Revision-Date: 2023-10-29 10:45+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: uz\n"
@@ -18,47 +18,67 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: src/keyboards/user.py:38
+#: src/keyboards/user.py:39
 msgid "✅ Проверить ✅"
 msgstr "✅ Tekshirish ✅"
 
-#: src/keyboards/user.py:46 src/messages/user.py:38
+#: src/keyboards/user.py:50 src/messages/user.py:47
 msgid "🎶 Новинки"
 msgstr "🎶 Yangiliklar"
 
-#: src/keyboards/user.py:46 src/messages/user.py:34
+#: src/keyboards/user.py:50 src/messages/user.py:43
 msgid "🎧 Популярное"
 msgstr "🎧 Ommabop"
 
-#: src/keyboards/user.py:47
+#: src/keyboards/user.py:51
 msgid "🔍 Поиск"
 msgstr "🔍 Qidiruv"
 
-#: src/keyboards/user.py:101
-msgid "🎵 Найти песню 🎵"
-msgstr "🎵 Qo'shiqni toping 🎵"
-
-#: src/keyboards/user.py:107
+#: src/keyboards/user.py:137
 msgid "🎵 Узнать песню 🎵"
 msgstr "🎵 Qo'shiqni bilib oling 🎵"
 
-#: src/messages/user.py:10
+#: src/keyboards/user.py:163
+msgid "➕ Добавить профиль ➕"
+msgstr "➕ Profil qo'shish ➕"
+
+#: src/keyboards/user.py:171
+msgid "Аудиозаписи"
+msgstr "Audio yozuvlar"
+
+#: src/keyboards/user.py:174
+msgid "Плейлисты"
+msgstr "Pleylistlar"
+
+#: src/keyboards/user.py:177
+msgid "Удалить"
+msgstr "O'chirish"
+
+#: src/keyboards/user.py:186
+msgid "Отмена"
+msgstr "Bekor qilish"
+
+#: src/messages/user.py:12
 msgid "👋 Привет, {user_name}!"
 msgstr "👋 Salom, {user_name}!"
 
-#: src/messages/user.py:14
+#: src/messages/user.py:17
 msgid "🌏 Выберите язык:"
 msgstr "🌏 Tilni tanlang:"
 
-#: src/messages/user.py:18
+#: src/messages/user.py:21
 msgid "✅ Язык выбран"
 msgstr "✅ Til tanlangan"
 
-#: src/messages/user.py:22
+#: src/messages/user.py:26
 msgid "❗Подпишитесь на каналы, чтобы получить песню❗"
 msgstr "❗Qo'shiq uchun kanallarga obuna bo'ling❗"
 
-#: src/messages/user.py:26
+#: src/messages/user.py:30
+msgid "Нажмите и подпишитесь на спонсоров в боте"
+msgstr "Botdagi homiylarni bosing va kuzatib boring"
+
+#: src/messages/user.py:34
 msgid ""
 "✅ Готово! \n"
 "Можете пользоваться ботом."
@@ -66,11 +86,11 @@ msgstr ""
 "✅ Tayyor! \n"
 "Siz botdan foydalanishingiz mumkin."
 
-#: src/messages/user.py:30
+#: src/messages/user.py:38
 msgid "Вы подписались не на все каналы 😔"
 msgstr "Siz barcha kanallarga obuna bo'lmagansiz😔"
 
-#: src/messages/user.py:42
+#: src/messages/user.py:51
 msgid ""
 "<b>🔎 Чтобы найти музыку, отправьте мне что-то из этого: \n"
 "\n"
@@ -88,7 +108,37 @@ msgstr ""
 "• Ovozli xabar \n"
 "• Video xabar</b>"
 
-#: src/messages/user.py:53
+#: src/messages/user.py:63
+msgid "👥 Сохранённые профили:"
+msgstr "👥 Saqlangan profillar:"
+
+#: src/messages/user.py:67
+msgid "👤 Профиль: <b>{profile_name}</b>"
+msgstr "Profil: <b>{profile_name}</b>"
+
+#: src/messages/user.py:71
+msgid "✅ Профиль {profile_name} удалён"
+msgstr "✅ Profil {profile_name} o'chirildi"
+
+#: src/messages/user.py:75
+msgid ""
+"<b>Отправь мне ссылку на страницу или сообщество.</b> \n"
+"\n"
+"Например: \n"
+"\n"
+"🔘 @durov \n"
+"🔘 vk.com/durov \n"
+"🔘 https://vk.com/id258650556 \n"
+msgstr ""
+"<b>Menga sahifaga yoki jamoaga havola yuboring.</b> \n"
+"\n"
+"Masalan: \n"
+"\n"
+"🔘 @durov \n"
+"🔘 vk.com/durov \n"
+"🔘 https://vk.com/id258650556 \n"
+
+#: src/messages/user.py:86
 msgid ""
 "🎵 Название песни: <b>{song_title}</b> \n"
 "🎸 Исполнитель: <b>{author_name}</b>"
@@ -96,20 +146,52 @@ msgstr ""
 "🎵Qo'shiq nomi: <b>{song_title} </b> \n"
 "Исполнитель ijrochi: <b>{author_name}</b>"
 
-#: src/messages/user.py:65
+#: src/messages/user.py:99
 msgid "Песня не найдена 😔🎧"
 msgstr "Qo'shiq topilmadi😔 🎧"
 
-#: src/messages/user.py:69
+#: src/messages/user.py:103
+msgid ""
+"<b>Неверная ссылка.</b> \n"
+"\n"
+"Попробуйте ещё раз, например: \n"
+"\n"
+"🔘 @durov \n"
+"🔘 vk.com/durov \n"
+"🔘 https://vk.com/id258650556 \n"
+msgstr ""
+"<b> noto'g'ri havola.</b> \n"
+"\n"
+"Qayta urinib ko'ring, masalan: \n"
+"\n"
+"🔘 @durov \n"
+"🔘 vk.com/durov \n"
+"🔘 https://vk.com/id258650556 \n"
+
+#: src/messages/user.py:113
+msgid "❗Аудиозаписи профиля/сообщества скрыты настройками приватности"
+msgstr "❗Profil/hamjamiyat audio yozuvlari maxfiylik sozlamalari bilan yashiringan"
+
+#: src/messages/user.py:117
+msgid ""
+"😢 Страница не найдена. \n"
+"Возможно, вы отправили неверную ссылку или короткое имя."
+msgstr ""
+"😢 Sahifa topilmadi. \n"
+"Siz noto'g'ri havolani yoki qisqa ismni yuborgan bo'lishingiz mumkin."
+
+#: src/messages/user.py:121
 #, fuzzy
 msgid "Файл слишком много весит 😔"
 msgstr "Audio fayl juda og'ir 😔"
 
-#: src/messages/user.py:73
+#: src/messages/user.py:125
 msgid "Пожалуйста, не так часто 🙏"
 msgstr "Iltimos, tez-tez emas 🙏"
 
-#: src/messages/user.py:77
-msgid "Вы можете скачать файл по <a href={}>🔗 этой ссылке 🔗</a>"
-msgstr ""
+#~ msgid "🎵 Найти песню 🎵"
+#~ msgstr "🎵 Qo'shiqni toping 🎵"
+
+#~ msgid "Вы можете скачать файл по <a href={}>🔗 этой ссылке 🔗</a>"
+#~ msgstr ""
 

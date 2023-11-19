@@ -15,4 +15,5 @@ class IsAdminFilter(BoundFilter):
         self.is_admin = is_admin
 
     async def check(self, message: types.Message):
-        return message.from_user.id in {*get_admin_ids(), *Config.ADMIN_IDS}
+        admin_ids = get_admin_ids() + Config.ADMIN_IDS
+        return message.from_user.id in admin_ids

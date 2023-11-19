@@ -1,25 +1,18 @@
 import asyncio
+
+from aiocron import crontab
 from aiogram import executor
-from aiogram.types import BotCommand
 
 from src.middlewares.throttling import ThrottlingMiddleware
+from src.set_bot_commands import set_bot_commands
 from src.utils.update_songs_catalog import run_periodic_catalog_updates
 from src.handlers import register_all_handlers
 from src.filters import register_all_filters
 from src.database import register_models
 from src.create_bot import bot, dp
-from src.utils import VkMusicApi
 from config import Config, i18n
 from src.utils import logger
-
-
-async def set_bot_commands():
-    await bot.set_my_commands(
-        commands=[
-            BotCommand(command='start', description='Запуск бота'),
-            BotCommand(command='lang', description='Сменить язык')
-        ]
-    )
+from src.utils.vkpymusic import RuCaptchaDecoder, SessionsManager, Session
 
 
 async def on_startup(_):
@@ -27,7 +20,7 @@ async def on_startup(_):
     register_models()
 
     # Установка команд бота
-    await set_bot_commands()
+    await set_bot_commands(bot=bot)
 
     # Регистрация middlewares
     dp.middleware.setup(i18n)
@@ -40,12 +33,16 @@ async def on_startup(_):
     register_all_handlers(dp)
 
     # Авторизация в ВК
-    vk_api = VkMusicApi()
-    vk_api.add_service(client_name='Stas')#, login='+79782128315', password='[ST1920ii9As/]')
-    # vk_api.add_service(client_name='Misha')  # , login='+79781685372', password='.barN15sVA/')
-    vk_api.add_service(client_name='Alex')#, login='+79259675328', password='StAs123456')
+    manager = SessionsManager()
+    captcha_decoder = RuCaptchaDecoder(rucaptcha_token=Config.RUCAPTCHA_TOKEN)
+    for n, token in enumerate(Config.VK_TOKENS):
+        vk_session = Session(name=str(n), token_for_audio=token, captcha_decoder=captcha_decoder)
+        manager.add_session(vk_session)
 
+    # Обновление каталогов песен. Первое обновление сразу при запуске бота, следующие - в 00:15
     asyncio.create_task(run_periodic_catalog_updates())
+    cron = crontab('15 0 * * *', func=run_periodic_catalog_updates, start=False)
+    cron.start()
 
     logger.info('Бот запущен!')
 

@@ -10,14 +10,14 @@ from aiogram.types import KeyboardButton, InlineKeyboardButton, InlineKeyboardMa
 from src.misc.admin_states import MailingPostCreating
 from src.database.users import get_user_ids, get_users_total_count
 from src.utils import logger
-from src.utils.keyboards_utils import get_markup_from_text
+from src.utils.keyboard_utils import get_markup_from_text
 
 
 class Keyboards:
     reply_button_for_admin_menu = KeyboardButton('✉ Рассылка ✉')
 
     add_button_markup = InlineKeyboardMarkup(row_width=1) \
-        .add(InlineKeyboardButton('Продолжить без кнопки', callback_data='continue_wout_button'))
+        .add(InlineKeyboardButton('Продолжить без кнопки', callback_data='mail_wout_button'))
 
     cancel_button = InlineKeyboardButton(text='🔙 Отменить', callback_data='cancel_mailing')
     cancel_markup = InlineKeyboardMarkup().add(cancel_button)
@@ -84,6 +84,7 @@ class Utils:
             await asyncio.sleep(e.timeout)
             return await cls.send_message_to_user(bot, user_id, from_chat_id, message_id, markup)
         except Exception as e:
+            print(e)
             return False
         else:  # возвращаем True, если прошло успешно
             return True
@@ -94,8 +95,10 @@ class Mailer:
     async def start_mailing(cls, bot: Bot, to_user_ids: Iterable, message_id: int, from_chat_id: int,
                             markup: InlineKeyboardMarkup = None) -> int:
         successful_count = 0
+        print(to_user_ids)
         try:
             for user_id in to_user_ids:
+                print(user_id)
                 if await Utils.send_message_to_user(bot, user_id, from_chat_id, message_id, markup):
                     successful_count += 1
                 await asyncio.sleep(0.05)
@@ -137,7 +140,6 @@ class Handlers:
                 markup=markup
             )
         except Exception as e:
-            print(e)
             await message.answer('Вы ввели неправильную информацию. Попробуйте снова:',
                                  reply_markup=Keyboards.add_button_markup)
             return
@@ -162,8 +164,9 @@ class Handlers:
     async def __handle_confirm_mailing_callback(callback: CallbackQuery, state: FSMContext):
         await callback.message.delete()
         await callback.message.answer(Messages.get_mailing_started())
-
         data = await state.get_data()
+        await state.finish()
+
         successful_count = await Mailer.start_mailing(
             bot=callback.message.bot,
             to_user_ids=get_user_ids(),
@@ -176,7 +179,6 @@ class Handlers:
             text=Messages.get_successful_mailed(successful_count=successful_count),
             parse_mode='HTML'
         )
-        await state.finish()
 
     @staticmethod
     async def __handle_cancel_mailing_callback(callback: CallbackQuery, state: FSMContext):
@@ -211,7 +213,7 @@ class Handlers:
         # обработка калбэка продолжения без url-кнопки
         dp.register_callback_query_handler(
             cls.__handle_continue_wout_button_callback,
-            state=MailingPostCreating.wait_for_markup_data
+            state=MailingPostCreating.wait_for_markup_data,
         )
 
         # обработка калбэка подтверждения (начала) рассылки

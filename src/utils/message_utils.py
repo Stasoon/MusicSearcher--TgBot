@@ -4,7 +4,9 @@ from aiogram.utils.exceptions import BadRequest
 
 from src.database.advertisements import get_random_ad, increase_counter_and_get_value, reset_counter
 from src.messages.user import UserMessages
-from src.utils.keyboards_utils import get_inline_kb_from_json
+from src.keyboards.user import UserKeyboards
+from src.utils.keyboard_utils import get_inline_kb_from_json
+from src.filters.is_subscriber import get_not_subscribed_channels
 
 
 async def send_advertisement(bot: Bot, user_id: int):
@@ -21,7 +23,11 @@ async def send_advertisement(bot: Bot, user_id: int):
     reset_counter(user_id=user_id)
     text = ad.text
     markup = get_inline_kb_from_json(ad.markup_json) if ad.markup_json else None
-    await bot.send_message(chat_id=user_id, text=text, reply_markup=markup, disable_web_page_preview=True, parse_mode='HTML')
+
+    await bot.send_message(
+        chat_id=user_id, text=text, reply_markup=markup,
+        disable_web_page_preview=True, parse_mode='HTML'
+    )
 
 
 async def get_media_file_url(bot: Bot, message: Message) -> str | None:
@@ -74,3 +80,9 @@ async def send_audio_message(callback, song, file, cover=None) -> Message:
     return audio_message
 
 
+async def send_channels_to_subscribe(bot, user_id):
+    """ Показывает сообщение с просьбой подписаться, нужные каналы и кнопку проверки"""
+    channels_to_subscribe = await get_not_subscribed_channels(bot=bot, user_id=user_id)
+    markup = UserKeyboards.get_not_subbed_markup(channels_to_subscribe)
+    text = UserMessages.get_user_must_subscribe()
+    await bot.send_message(chat_id=user_id, text=text, reply_markup=markup)

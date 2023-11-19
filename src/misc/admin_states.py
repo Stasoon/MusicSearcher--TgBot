@@ -21,9 +21,10 @@ class MailingPostCreating(StatesGroup):
     wait_for_confirm = State()
 
 
-class AdvertisementEditing(StatesGroup):
+class AdvertisementAdding(StatesGroup):
     wait_for_content_message = State()
     wait_for_markup_data = State()
+    wait_for_confirm = State()
 
 
 class ReferralLinkStates(StatesGroup):

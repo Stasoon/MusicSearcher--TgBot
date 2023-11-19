@@ -23,6 +23,10 @@ def create_user(telegram_id: int, firstname: str, username: str = None, reflink:
 
 # region SQL Select
 
+def get_user_or_none(telegram_id: int) -> User | None:
+    return User.get_or_none(User.telegram_id == telegram_id)
+
+
 def get_users_total_count() -> int:
     return User.select().count()
 

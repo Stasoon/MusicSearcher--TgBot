@@ -2,13 +2,13 @@ from aiogram import Dispatcher
 from aiogram.types import InlineQuery, InlineQueryResultAudio, InlineQueryResultArticle, InputTextMessageContent
 
 from src.filters import IsSubscriberFilter
-from src.handlers.user.searching import get_song_file
+from src.handlers.user.search_song import get_song_file
 from src.keyboards.user import UserKeyboards
 from src.messages.user import UserMessages
-from src.utils import VkMusicApi
+from src.utils.vkpymusic import SessionsManager
 
 
-def get_not_found():
+def get_not_found_article() -> InlineQueryResultArticle:
     not_found_text = UserMessages.get_song_not_found_error()
     input_msg_content = InputTextMessageContent(message_text=not_found_text)
 
@@ -18,61 +18,54 @@ def get_not_found():
     )
 
 
-# # Дописать проверку подписки
-# async def inline_search(query: InlineQuery):
-#     results = []
-#     channels = ['stascsa', 'testchannel', 'wb']
-#     for channel_link in channels:
-#         # Создаем описание со ссылкой на канал
-#         channel_link = "https://t.me/your_channel_username"  # Замените на фактическую ссылку на канал
-#         description_with_link = f"<a href='{channel_link}'>Перейти в канал</a>"
-#
-#         # Создаем InlineQueryResultArticle с описанием, содержащим ссылку
-#         result = InlineQueryResultArticle(
-#             id="1",
-#             title="Заголовок результата",
-#             input_message_content=InputTextMessageContent(message_text="Текст сообщения"),
-#             description=description_with_link,
-#         )
-#
-#         results.append(result)
-#
-#     # Отправляем результаты в ответ на инлайн-запрос
-#     await query.answer(results, cache_time=1)
-
-
 async def handle_search_song_inline(query: InlineQuery):
-    max_offset = 20
-    offset = int(query.offset) if len(query.offset) > 0 else 0
-    next_offset = offset + 10
-    if offset + 10 > max_offset:
-        return
-
-    songs = await VkMusicApi.get_songs_by_text(text=query.query, offset=offset)
+    service = await SessionsManager().get_available_service()
+    _, songs = await service.search_songs_by_text(text=query.query, count=20)
 
     if not songs:
-        await query.answer(results=[get_not_found()], cache_time=1, is_personal=True)
+        await query.answer(results=[get_not_found_article()], cache_time=1, is_personal=True)
         return
 
     response_items = []
     bot_username = (await query.bot.get_me()).username
-    markup = UserKeyboards.get_(bot_username=bot_username)
+    markup = UserMessages.get_audio_file_caption(bot_username=bot_username)
 
     for song in songs:
         audio = get_song_file(song)
-        if not isinstance(audio, str): audio = song.url
+        if not isinstance(audio, str):
+            audio = song.url
 
         response_items.append(
             InlineQueryResultAudio(
-                id=f"{song.owner_id}_{song.song_id}",
+                id=f"{song.owner_id}_{song.id}",
                 audio_url=audio, title=song.title, performer=song.artist,
-                reply_markup=markup, parse_mode='HTML'
+                caption=markup, parse_mode='HTML'
             )
         )
 
-    await query.answer(response_items, cache_time=1, is_personal=True, next_offset=next_offset)
+    bot_full_name = (await query.bot.get_me()).full_name
+    await query.answer(
+        results=response_items, next_offset="break",
+        switch_pm_text=bot_full_name, switch_pm_parameter='_',
+        cache_time=10_000, is_personal=False  # Если введённый запрос уже был, телеграм отправит результат сразу
+    )
+
+
+async def unsubscribed_inline_search(query: InlineQuery):
+    await query.answer(
+        results=[], cache_time=1, is_personal=True,
+        switch_pm_text='Нажмите и подпишитесь на спонсоров в боте',
+        switch_pm_parameter='show_channels_to_subscribe'
+    )
 
 
 def register_inline_mode_handlers(dp: Dispatcher):
-    dp.register_inline_handler(handle_search_song_inline, IsSubscriberFilter(True))
-    # dp.register_inline_handler(inline_search)
+    # Поиск без подписки
+    dp.register_inline_handler(unsubscribed_inline_search, IsSubscriberFilter(False))
+
+    # Обычный поиск
+    # Срабатывает, если текст запроса не пустой и отсутствует смещение
+    dp.register_inline_handler(
+        handle_search_song_inline,
+        lambda query: query.query.strip() != '' and query.offset == ""
+    )

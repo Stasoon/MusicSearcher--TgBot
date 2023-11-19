@@ -1,29 +1,24 @@
 import re
 from dataclasses import dataclass
 
+from .VkItem import VkItem
+
 
 @dataclass
-class VkSong:
+class Song(VkItem):
     title: str
     artist: str
     duration: int
-    song_id: int
+    id: int
     owner_id: int
     url: str = None
+    # lyrics_id: int = None
 
-    def __str__(self):
+    def __repr__(self):
         return f"{self.artist} - {self.title}"
 
     def to_dict(self) -> dict:
         return self.__dict__
-
-    def to_safe(self):
-        def safe_format(string):
-            safe_string = re.sub(r"[^A-zА-я0-9+\s]", "", string)
-            return safe_string
-
-        self.title = safe_format(self.title)
-        self.artist = safe_format(self.artist)
 
     @classmethod
     def from_json(cls, item):
@@ -34,5 +29,17 @@ class VkSong:
         owner_id = int(item["owner_id"])
         url = str(item["url"])
 
-        song = cls(title, artist, duration, track_id, owner_id, url)
+        song = cls(
+            id=track_id, owner_id=owner_id,
+            title=title, artist=artist,
+            duration=duration, url=url
+        )
         return song
+
+    def to_safe(self):
+        def safe_format(string):
+            safe_string = re.sub(r"[^A-zА-я0-9+\s]", "", string)
+            return safe_string
+
+        self.title = safe_format(self.title)
+        self.artist = safe_format(self.artist)

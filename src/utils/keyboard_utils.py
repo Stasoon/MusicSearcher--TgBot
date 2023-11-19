@@ -1,3 +1,5 @@
+import json
+
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
 
 
@@ -25,9 +27,11 @@ def get_markup_from_text(text: str) -> InlineKeyboardMarkup:
     return markup
 
 
-def get_inline_kb_from_json(data: dict) -> InlineKeyboardMarkup:
+def get_inline_kb_from_json(data: dict | str) -> InlineKeyboardMarkup:
     """ Из словаря с клавиатурой делает объект """
-    markup = InlineKeyboardMarkup.to_object(data=data)
+    if isinstance(data, str):
+        data = json.loads(data)
+    markup = InlineKeyboardMarkup.to_object(data)
     return markup
 
 

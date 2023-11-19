@@ -103,17 +103,6 @@ class TokenReceiver:
 
         response_json = json.loads(response.content.decode("utf-8"))
 
-        # right_response_json = {
-        #     "response": {
-        #         "type": "general",
-        #         "sid": {str(sid)},
-        #         "delay": 60,
-        #         "libverify_support": False,
-        #         "validation_type": "sms",
-        #         "validation_resend": "sms"
-        #     }
-        # }
-
         return response_json
 
     def auth(
