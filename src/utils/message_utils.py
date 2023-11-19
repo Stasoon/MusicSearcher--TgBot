@@ -70,11 +70,11 @@ def send_and_delete_timer():
     return decorator
 
 
-async def send_audio_message(callback, song, file, cover=None) -> Message:
+async def send_audio_message(callback, file, song_title: str = None, artist_name: str = None, cover=None) -> Message:
     """ Отправляет аудио-сообщение с музыкой и подписью в ответ на callback запрос. """
     bot_username = (await callback.bot.get_me()).username
     audio_message = await callback.message.answer_audio(
-        audio=file, title=song.title, performer=song.artist, thumb=cover,
+        audio=file, title=song_title, performer=artist_name, thumb=cover,
         caption=UserMessages.get_audio_file_caption(bot_username=bot_username)
     )
     return audio_message

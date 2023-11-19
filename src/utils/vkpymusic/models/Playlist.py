@@ -8,7 +8,7 @@ class Playlist:
     photo: str
     count: int
     access_key: str
-    id: int
+    playlist_id: int
     owner_id: int
 
     def __repr__(self):
@@ -38,7 +38,7 @@ class Playlist:
         access_key = str(item["access_key"])
 
         playlist = cls(
-            id=playlist_id, owner_id=owner_id,
+            playlist_id=playlist_id, owner_id=owner_id,
             title=title, #description=description,
             photo=photo, count=count, access_key=access_key
         )

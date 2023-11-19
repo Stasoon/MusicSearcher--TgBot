@@ -131,7 +131,7 @@ def register_navigation_handlers(dp: Dispatcher):
     # Для старых пользователей
     dp.register_message_handler(
         handle_old_buttons,
-        Text(contains=['🎙Популярное', '🔥Мировой чарт', '🔍Поиск', '🎧Новинки']),
+        lambda message: message.text in ('🎙Популярное', '🔥Мировой чарт', '🔍Поиск', '🎧Новинки'),
         state='*'
     )
 

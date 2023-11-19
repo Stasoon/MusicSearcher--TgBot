@@ -20,7 +20,7 @@ def rewrite_catalog(catalog: Literal['popular', 'new'], songs: list[Song]):
         try:
             model.create(
                 title=song.title, artist=song.artist,
-                owner_id=song.owner_id, song_id=song.id,
+                owner_id=song.owner_id, song_id=song.song_id,
                 duration=song.duration
             )
         except IntegrityError:

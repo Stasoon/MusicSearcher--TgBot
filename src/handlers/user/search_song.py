@@ -35,7 +35,7 @@ def get_song_file(song: Song) -> InputFile | str:
     Если file_id песни есть в базе данных, возвращает его.
     Иначе возвращает InputFile на основе ссылки на песню.
     """
-    file_id = songs_hashes.get_song_file_id(song_id=song.id, owner_id=song.owner_id)
+    file_id = songs_hashes.get_song_file_id(song_id=song.song_id, owner_id=song.owner_id)
 
     if file_id: return file_id
     return InputFile.from_url(url=song.url, filename=song.title)
@@ -127,23 +127,35 @@ async def handle_show_song_callback(callback: CallbackQuery, callback_data: Song
     await callback.bot.send_chat_action(chat_id=callback.from_user.id, action='UPLOAD_VOICE')
 
     song_id, owner_id = callback_data.get('id'), callback_data.get('owner_id')
-    service = await SessionsManager().get_available_service()
-    song = await service.get_song(owner_id=owner_id, audio_id=song_id)
+    print(song_id, owner_id)
 
-    if not song:
-        await callback.message.answer(UserMessages.get_song_not_found_error())
-        return
+    file = songs_hashes.get_song_file_id(song_id=song_id, owner_id=owner_id)
+    song_title, artist = None, None
+    song = None
 
-    file = get_song_file(song)
+    if not file:
+        service = await SessionsManager().get_available_service()
+        song = await service.get_song(owner_id=owner_id, audio_id=song_id)
+
+        if not song:
+            await callback.message.answer(UserMessages.get_song_not_found_error())
+            return
+
+        file = InputFile.from_url(url=song.url, filename=song.title)
+        song_title = song.title
+        artist = song.artist
 
     try:
-        file_msg = await send_audio_message(callback=callback, song=song, file=file, cover=None)
+        file_msg = await send_audio_message(
+            callback=callback, song_title=song_title, artist_name=artist, file=file, cover=None
+        )
     except NetworkError:
         await callback.message.answer(text=UserMessages.get_file_too_big_error())
     else:
-        songs_hashes.save_song_if_not_hashed(
-            song_id=song.id, owner_id=song.owner_id, file_id=file_msg.audio.file_id
-        )
+        if song:
+            songs_hashes.save_song_if_not_hashed(
+                song_id=song.song_id, owner_id=song.owner_id, file_id=file_msg.audio.file_id
+            )
     finally:
         await send_advertisement(callback.bot, callback.from_user.id)
 

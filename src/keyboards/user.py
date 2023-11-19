@@ -90,7 +90,7 @@ class UserKeyboards:
             markup.row(InlineKeyboardButton(
                 text=f"{get_formatted_duration(song.duration)} | {song.title} - {song.artist}",
                 callback_data=SongCallback.new(
-                    id=song.id, owner_id=song.owner_id
+                    id=song.song_id, owner_id=song.owner_id
                 )
             ))
             for song in songs
@@ -119,7 +119,7 @@ class UserKeyboards:
             markup.row(InlineKeyboardButton(
                 text=str(playlist),
                 callback_data=PlaylistCallback.new(
-                    id=playlist.id, owner_id=playlist.owner_id, access_key=playlist.access_key
+                    id=playlist.playlist_id, owner_id=playlist.owner_id, access_key=playlist.access_key
                 )
             ))
         if append_navigation:

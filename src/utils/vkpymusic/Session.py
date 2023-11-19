@@ -111,7 +111,7 @@ class Session:
             content = content['response'][0]
             song = Song.from_json(content)
         except Exception as e:
-            logger.error(f"{e}")
+            logger.error(e)
             return
         return song
 

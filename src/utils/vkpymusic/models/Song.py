@@ -9,7 +9,7 @@ class Song(VkItem):
     title: str
     artist: str
     duration: int
-    id: int
+    song_id: int
     owner_id: int
     url: str = None
     # lyrics_id: int = None
@@ -30,7 +30,7 @@ class Song(VkItem):
         url = str(item["url"])
 
         song = cls(
-            id=track_id, owner_id=owner_id,
+            song_id=track_id, owner_id=owner_id,
             title=title, artist=artist,
             duration=duration, url=url
         )

@@ -61,7 +61,7 @@ class VkMusicParser:
         duration_str = await duration_element.inner_text()
         duration = cls.__get_seconds_from_duration(duration_str)
 
-        song = Song(title=title, artist=artist, owner_id=owner_id, id=song_id, duration=duration)
+        song = Song(title=title, artist=artist, owner_id=owner_id, song_id=song_id, duration=duration)
         return song
 
     @staticmethod

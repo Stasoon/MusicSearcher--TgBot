@@ -37,7 +37,7 @@ async def handle_search_song_inline(query: InlineQuery):
 
         response_items.append(
             InlineQueryResultAudio(
-                id=f"{song.owner_id}_{song.id}",
+                id=f"{song.owner_id}_{song.song_id}",
                 audio_url=audio, title=song.title, performer=song.artist,
                 caption=markup, parse_mode='HTML'
             )
