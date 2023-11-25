@@ -18,12 +18,16 @@ from src.database import songs_hashes
 
 
 import json
+
+from src.utils.vkpymusic.Session import CaptchaNeeded
+
+
 async def send_error_notification(e, message: Message):
     """ Отправляет в чат с админами бота сообщение об ошибке """
     # Пока есть ошибки
     msg_dict = json.loads(message.as_json())
     formatted_msg_data = json.dumps(msg_dict, indent=2, ensure_ascii=False)
-    logs_chat_id = 1136918511  # -1002062707336
+    logs_chat_id = -1002062707336
     await message.bot.send_message(
         chat_id=logs_chat_id,
         text=f'Песня не найдена. \nОшибка: {e} \nЗапрос: {formatted_msg_data}'
@@ -70,9 +74,13 @@ async def handle_text_message(message: Message):
     await message.answer_chat_action(action='typing')
 
     service = await SessionsManager().get_available_service()
-    founded_count, songs = await service.search_songs_by_text(text=message.text, count=SONGS_PER_PAGE)
+    try:
+        found_count, songs = await service.search_songs_by_text(text=message.text, count=SONGS_PER_PAGE)
+    except CaptchaNeeded as e:
+        await send_error_notification(e=e, message=message)
+        found_count, songs = 0, []
 
-    possible_pages_cnt = founded_count // SONGS_PER_PAGE if founded_count >= SONGS_PER_PAGE else 1
+    possible_pages_cnt = found_count // SONGS_PER_PAGE if found_count >= SONGS_PER_PAGE else 1
     max_pages = (
         possible_pages_cnt
         if possible_pages_cnt < MAX_SONG_PAGES_COUNT
@@ -81,8 +89,6 @@ async def handle_text_message(message: Message):
 
     if not songs:
         await message.reply(text=UserMessages.get_song_not_found_error(), parse_mode='HTML')
-        # !!!!!!!
-        await send_error_notification('При текстовом поиске', message)
         return
 
     markup = UserKeyboards.get_found_songs(songs, current_page_num=1, max_pages=max_pages)
@@ -127,7 +133,6 @@ async def handle_show_song_callback(callback: CallbackQuery, callback_data: Song
     await callback.bot.send_chat_action(chat_id=callback.from_user.id, action='UPLOAD_VOICE')
 
     song_id, owner_id = callback_data.get('id'), callback_data.get('owner_id')
-    print(song_id, owner_id)
 
     file = songs_hashes.get_song_file_id(song_id=song_id, owner_id=owner_id)
     song_title, artist = None, None

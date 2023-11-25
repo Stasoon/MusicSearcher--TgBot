@@ -20,7 +20,10 @@ def get_not_found_article() -> InlineQueryResultArticle:
 
 async def handle_search_song_inline(query: InlineQuery):
     service = await SessionsManager().get_available_service()
-    _, songs = await service.search_songs_by_text(text=query.query, count=20)
+    try:
+        _, songs = await service.search_songs_by_text(text=query.query, count=20)
+    except Exception:
+        return
 
     if not songs:
         await query.answer(results=[get_not_found_article()], cache_time=1, is_personal=True)

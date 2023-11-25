@@ -34,7 +34,7 @@ class Playlist:
 
         count = int(item["count"])
         owner_id = int(item["owner_id"])
-        playlist_id = int(item["id"])
+        playlist_id = int(item["id"]) if item.get('id') else int(item['playlist_id'])
         access_key = str(item["access_key"])
 
         playlist = cls(

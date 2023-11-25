@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-11-19 18:19+0300\n"
+"POT-Creation-Date: 2023-11-24 18:28+0300\n"
 "PO-Revision-Date: 2023-10-29 10:47+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -130,7 +130,9 @@ msgid ""
 msgstr ""
 
 #: src/messages/user.py:99
-msgid "Песня не найдена 😔🎧"
+msgid ""
+"Песня не найдена 😔🎧 \n"
+"Перефразируйте запрос и попробуйте снова"
 msgstr ""
 
 #: src/messages/user.py:103
@@ -169,5 +171,24 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Вы можете скачать файл по <a href={}>🔗 этой ссылке 🔗</a>"
+#~ msgstr ""
+
+#~ msgid "👋 Привет, {user_name}!"
+#~ msgstr ""
+
+#~ msgid "Песня не найдена 😔🎧"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "❤️ Men musiqani yuklab olish uchun "
+#~ "Botman va bu erda yozgan har "
+#~ "qanday qo'shiqni yuklab olsam bo'ladimi? \n"
+#~ ""
+#~ "🔝┏ Haqiqiy xitlarni yuklab oling \n"
+#~ "🆕┣ Yangi musiqalarni yuklab oling \n"
+#~ "📻┣ Internetsiz musiqa tinglang \n"
+#~ "🔍┗ Talab bo'yicha musiqani yuklab oling \n"
+#~ "🎵┏ @only_music888 -ga obuna bo'ling \n"
+#~ "🅰️┗ Barcha savollar uchun @neo_smm"
 #~ msgstr ""
 

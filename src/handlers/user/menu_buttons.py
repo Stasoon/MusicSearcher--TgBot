@@ -12,7 +12,7 @@ from src.messages.user import UserMessages
 from src.utils.vkpymusic import SessionsManager, Song
 from config import i18n
 from config.settings import MAX_SONG_PAGES_COUNT, SONGS_PER_PAGE
-
+from src.utils.vkpymusic.Session import CaptchaNeeded
 
 # region Utils
 
@@ -43,9 +43,12 @@ async def get_next_page_songs(
     match category:
         case 'search':
             service = await SessionsManager().get_available_service()
-            count, songs = await service.search_songs_by_text(
-                text=callback.message.text, count=songs_per_page, offset=offset
-            )
+            try:
+                count, songs = await service.search_songs_by_text(
+                    text=callback.message.text, count=songs_per_page, offset=offset
+                )
+            except CaptchaNeeded:
+                songs = []
             return songs
         case 'popular' | 'new':
             return song_catalogs.get_songs_from_catalog(category=category, count=songs_per_page, offset=offset)

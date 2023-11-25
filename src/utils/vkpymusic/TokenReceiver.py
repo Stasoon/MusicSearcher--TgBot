@@ -126,7 +126,8 @@ class TokenReceiver:
             bool: Boolean value indicating whether authorization was successful or not.
         """
         response_auth: requests.Response = self.__request_auth()
-        response_auth_json = json.loads(response_auth.content.decode("utf-8"))
+        print(response_auth.content)
+        response_auth_json = json.loads(response_auth.content.decode("utf-8", errors="replace"))
 
         while "error" in response_auth_json:
             error = response_auth_json["error"]
@@ -154,7 +155,7 @@ class TokenReceiver:
                 response_auth_json = json.loads(response_auth.content.decode("utf-8"))
             
             elif error == "invalid_request":
-                logger.warn("Invalid code. Try again!")
+                print("Invalid code. Try again!")
                 code: str = on_2fa()
 
                 response_auth = self.__request_auth(code=code)
@@ -190,7 +191,7 @@ class TokenReceiver:
         """
         token = self.__token
         if not token:
-            logger.warn('Please, first call the method "auth".')
+            print('Please, first call the method "auth".')
             return
         logger.info(token)
         return token
@@ -204,7 +205,8 @@ class TokenReceiver:
         """
         token: str = self.__token
         if not token:
-            logger.warn('Please, first call the method "auth"')
+            # logger.warn('Please, first call the method "auth"')
+            print('Please, first call the method "auth"')
             return
         full_fp = self.create_path(file_path)
         if os.path.isfile(full_fp):

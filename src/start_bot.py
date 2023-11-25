@@ -24,7 +24,7 @@ async def on_startup(_):
 
     # Регистрация middlewares
     dp.middleware.setup(i18n)
-    dp.middleware.setup(ThrottlingMiddleware())
+    # dp.middleware.setup(ThrottlingMiddleware())
 
     # Регистрация фильтров
     register_all_filters(dp)

@@ -9,6 +9,12 @@ from .CaptchaDecoder import BaseCaptchaDecoder
 from .user_agents import get_vk_user_agent
 
 
+class CaptchaNeeded(Exception):
+    def __init__(self, message="Требуется ввод капчи!"):
+        self.message = message
+        super().__init__(self.message)
+
+
 class Session:
     def __init__(self, name: str, token_for_audio: str, captcha_decoder: BaseCaptchaDecoder):
         self.name = name
@@ -41,7 +47,8 @@ class Session:
                         captcha_bytes = await self.captcha_decoder.get_bytes_from_captcha_url(captcha_url)
                         captcha_key = await self.captcha_decoder.get_captcha_key(captcha_bytes)
                         params.update(captcha_sid=captcha_sid, captcha_key=captcha_key)
-                        return await self.__get_response_content(method, params=params)
+                        raise CaptchaNeeded()
+                        # return await self.__get_response_content(method, params=params)
                 return content
 
     ##############
@@ -70,7 +77,7 @@ class Session:
             "count": count,
             "offset": offset,
             "sort": 2,  # сортировка - по популярности
-            "autocomplete": 0  # исправлять ошибки
+            "autocomplete": 1  # исправлять ошибки
         }
         return await self.__get_response_content("search", params)
 

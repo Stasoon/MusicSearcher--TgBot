@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-11-19 18:19+0300\n"
+"POT-Creation-Date: 2023-11-24 18:28+0300\n"
 "PO-Revision-Date: 2023-10-29 10:45+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: uz\n"
@@ -147,8 +147,12 @@ msgstr ""
 "Исполнитель ijrochi: <b>{author_name}</b>"
 
 #: src/messages/user.py:99
-msgid "Песня не найдена 😔🎧"
-msgstr "Qo'shiq topilmadi😔 🎧"
+msgid ""
+"Песня не найдена 😔🎧 \n"
+"Перефразируйте запрос и попробуйте снова"
+msgstr ""
+"Qo'shiq topilmadi 😔🎧 \n"
+"So'rovni takrorlang va yana urinib ko'ring"
 
 #: src/messages/user.py:103
 msgid ""
@@ -194,4 +198,10 @@ msgstr "Iltimos, tez-tez emas 🙏"
 
 #~ msgid "Вы можете скачать файл по <a href={}>🔗 этой ссылке 🔗</a>"
 #~ msgstr ""
+
+#~ msgid "👋 Привет, {user_name}!"
+#~ msgstr "👋 Salom, {user_name}!"
+
+#~ msgid "Песня не найдена 😔🎧"
+#~ msgstr "Qo'shiq topilmadi😔 🎧"
 

@@ -1,5 +1,7 @@
 from aiogram import Bot
-from aiogram.types import BotCommand, BotCommandScopeAllPrivateChats, MenuButtonCommands
+from aiogram.types import (
+    BotCommand, BotCommandScopeAllPrivateChats, MenuButtonCommands
+)
 
 
 async def set_bot_commands(bot: Bot):
@@ -15,5 +17,3 @@ async def set_bot_commands(bot: Bot):
         ],
         scope=BotCommandScopeAllPrivateChats(), language_code='ru'
     )
-
-

@@ -9,7 +9,7 @@ class UserMessages:
     # Приветствие
     @staticmethod
     def get_welcome(user_name: str) -> str:
-        return _('👋 Привет, {user_name}!').format(user_name=fmt.quote_html(user_name))
+        return _("👋 Привет, {user_name}!").format(user_name=user_name)
 
     # Выбор языка
     @staticmethod
@@ -96,7 +96,7 @@ class UserMessages:
     # Ошибки
     @staticmethod
     def get_song_not_found_error() -> str:
-        return _("Песня не найдена 😔🎧")
+        return _("Песня не найдена 😔🎧 \nПерефразируйте запрос и попробуйте снова")
 
     @staticmethod
     def get_profile_link_invalid_retry() -> str:

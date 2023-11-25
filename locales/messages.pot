@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-11-19 18:19+0300\n"
+"POT-Creation-Date: 2023-11-24 18:28+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -128,7 +128,9 @@ msgid ""
 msgstr ""
 
 #: src/messages/user.py:99
-msgid "Песня не найдена 😔🎧"
+msgid ""
+"Песня не найдена 😔🎧 \n"
+"Перефразируйте запрос и попробуйте снова"
 msgstr ""
 
 #: src/messages/user.py:103
