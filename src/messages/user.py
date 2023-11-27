@@ -9,7 +9,7 @@ class UserMessages:
     # Приветствие
     @staticmethod
     def get_welcome(user_name: str) -> str:
-        return _("👋 Привет, {user_name}!").format(user_name=user_name)
+        return _("👋 Привет, {user_name}!").format(user_name=fmt.quote_html(user_name))
 
     # Выбор языка
     @staticmethod
@@ -64,11 +64,11 @@ class UserMessages:
 
     @staticmethod
     def get_profile_description(profile_name: str) -> str:
-        return _('👤 Профиль: <b>{profile_name}</b>').format(profile_name=profile_name)
+        return _('👤 Профиль: <b>{profile_name}</b>').format(profile_name=fmt.quote_html(profile_name))
 
     @staticmethod
     def get_profile_successfully_removed(profile_name: str) -> str:
-        return _('✅ Профиль {profile_name} удалён').format(profile_name=profile_name)
+        return _('✅ Профиль {profile_name} удалён').format(profile_name=fmt.quote_html(profile_name))
 
     @staticmethod
     def get_profiles_adding_guide() -> str:
@@ -86,7 +86,7 @@ class UserMessages:
         return _(
             '🎵 Название песни: <b>{song_title}</b> \n'
             '🎸 Исполнитель: <b>{author_name}</b>'
-        ).format(song_title=song_title, author_name=author_name)
+        ).format(song_title=fmt.quote_html(song_title), author_name=fmt.quote_html(author_name))
 
     @staticmethod
     def get_audio_file_caption(bot_username: str) -> str:

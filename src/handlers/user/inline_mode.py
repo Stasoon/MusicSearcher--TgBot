@@ -1,9 +1,11 @@
 from aiogram import Dispatcher
-from aiogram.types import InlineQuery, InlineQueryResultAudio, InlineQueryResultArticle, InputTextMessageContent
+from aiogram.types import (
+    InlineQuery, InlineQueryResultAudio, InlineQueryResultCachedAudio,
+    InlineQueryResultArticle, InputTextMessageContent
+)
 
 from src.filters import IsSubscriberFilter
 from src.handlers.user.search_song import get_song_file
-from src.keyboards.user import UserKeyboards
 from src.messages.user import UserMessages
 from src.utils.vkpymusic import SessionsManager
 
@@ -31,20 +33,21 @@ async def handle_search_song_inline(query: InlineQuery):
 
     response_items = []
     bot_username = (await query.bot.get_me()).username
-    markup = UserMessages.get_audio_file_caption(bot_username=bot_username)
+    audio_file_caption = UserMessages.get_audio_file_caption(bot_username=bot_username)
 
     for song in songs:
         audio = get_song_file(song)
         if not isinstance(audio, str):
-            audio = song.url
-
-        response_items.append(
-            InlineQueryResultAudio(
+            item = InlineQueryResultAudio(
                 id=f"{song.owner_id}_{song.song_id}",
-                audio_url=audio, title=song.title, performer=song.artist,
-                caption=markup, parse_mode='HTML'
+                audio_url=song.url, title=song.title, performer=song.artist,
+                caption=audio_file_caption, parse_mode='HTML'
             )
-        )
+        else:
+            item = InlineQueryResultCachedAudio(
+                id=f"{song.owner_id}_{song.song_id}", audio_file_id=audio, caption=audio_file_caption
+            )
+        response_items.append(item)
 
     bot_full_name = (await query.bot.get_me()).full_name
     await query.answer(

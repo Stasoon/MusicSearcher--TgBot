@@ -9,7 +9,7 @@ from .reflinks import increase_users_count
 
 # region SQL Create
 
-def create_user(telegram_id: int, firstname: str, username: str = None, reflink: str = None) -> None:
+def create_user_if_not_exist(telegram_id: int, firstname: str, username: str = None, reflink: str = None) -> None:
     if not get_user_by_telegram_id_or_none(telegram_id):
         reg_time = datetime.now()
         User.create(
@@ -17,6 +17,8 @@ def create_user(telegram_id: int, firstname: str, username: str = None, reflink:
             referral_link=reflink, registration_timestamp=reg_time
         )
         increase_users_count(reflink=reflink)
+    else:
+        User.update(name=firstname, username=username).where(User.telegram_id == telegram_id)
 
 # endregion
 

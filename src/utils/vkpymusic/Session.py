@@ -47,8 +47,8 @@ class Session:
                         captcha_bytes = await self.captcha_decoder.get_bytes_from_captcha_url(captcha_url)
                         captcha_key = await self.captcha_decoder.get_captcha_key(captcha_bytes)
                         params.update(captcha_sid=captcha_sid, captcha_key=captcha_key)
-                        raise CaptchaNeeded()
-                        # return await self.__get_response_content(method, params=params)
+                        await self.__get_response_content(method, params=params)
+                        raise CaptchaNeeded
                 return content
 
     ##############
@@ -118,6 +118,7 @@ class Session:
             content = content['response'][0]
             song = Song.from_json(content)
         except Exception as e:
+            logger.error(f"{e}")
             logger.error(e)
             return
         return song
@@ -147,6 +148,8 @@ class Session:
             response = await self.__search(text, count, offset)
             results_count = response['response']['count']
             songs = self.__fetch_songs_from_response(response)
+        except CaptchaNeeded:
+            raise CaptchaNeeded
         except Exception as e:
             logger.error(e)
             return 0, []

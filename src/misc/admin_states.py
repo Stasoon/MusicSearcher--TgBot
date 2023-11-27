@@ -30,4 +30,3 @@ class AdvertisementAdding(StatesGroup):
 class ReferralLinkStates(StatesGroup):
     create = State()
     delete = State()
-    find = State()

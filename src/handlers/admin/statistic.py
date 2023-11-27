@@ -14,7 +14,8 @@ language_emoji_map = {
     'ru': '🇷🇺',
     'uk': '🇺🇦',
     'uz': '🇺🇿',
-    'en': '🇬🇧'
+    'en': '🇬🇧',
+    None: '🇷🇺'
 }
 
 
@@ -52,7 +53,7 @@ class Messages:
     def get_menu():
         languages = users.get_users_languages()
         text = f'📊 Статистика \n\n' \
-               f'🎵 Песен в хэше: {get_hashed_songs_count()} \n' \
+               f'🎵 Песен в кэше: {get_hashed_songs_count()} \n' \
                f'👥 Всего: {users.get_users_total_count()} \n'
 
         text += ' | '.join(
