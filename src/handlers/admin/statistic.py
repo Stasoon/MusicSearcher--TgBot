@@ -1,3 +1,4 @@
+import psutil
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery
@@ -15,7 +16,7 @@ language_emoji_map = {
     'uk': '🇺🇦',
     'uz': '🇺🇿',
     'en': '🇬🇧',
-    None: '🇷🇺'
+    None: '🏳️'
 }
 
 
@@ -28,7 +29,6 @@ class Keyboards:
         InlineKeyboardButton(text='Неделя', callback_data=statistic_callback_data.new('week')),
         InlineKeyboardButton(text='Сутки', callback_data=statistic_callback_data.new('day')),
         InlineKeyboardButton(text='Час', callback_data=statistic_callback_data.new('hour')),
-        InlineKeyboardButton(text='🔃 Всё время', callback_data=statistic_callback_data.new('all_time')),
         InlineKeyboardButton(text='⌨ Другое количество', callback_data=statistic_callback_data.new('other')),
     )
 
@@ -50,18 +50,34 @@ class Messages:
         }.get(key)
 
     @staticmethod
+    def __get_server_load_text():
+        cpu_percent = psutil.cpu_percent(interval=1)  # interval - интервал в секундах
+        memory_info = psutil.virtual_memory()
+        memory_volume = memory_info.total / (1024 ** 3)
+        used_memory = memory_info.used / (1024 ** 3)
+
+        return (
+            f'💻 Нагрузка сервера: \n'
+            f'➖ Процессор: {cpu_percent}% \n'
+            f'➖ Оперативная память: {memory_info.percent}% ({used_memory:.2f} Гб / {memory_volume:.2f} Гб) \n'
+        )
+
+    @staticmethod
     def get_menu():
         languages = users.get_users_languages()
-        text = f'📊 Статистика \n\n' \
-               f'🎵 Песен в кэше: {get_hashed_songs_count()} \n' \
-               f'👥 Всего: {users.get_users_total_count()} \n'
+        text = (
+            f'📊 Статистика \n\n'
+            f'🎵 Песен в кэше: {get_hashed_songs_count()} \n'
+            f'👥 Всего: {users.get_users_total_count()} \n'
+        )
 
         text += ' | '.join(
             [f"{language_emoji_map.get(lang)} {users.get_users_count_by_language(lang)}"
              for lang in languages]
         )
+        text += '\n\n' + Messages.__get_server_load_text()
 
-        return text + f' \n\n📊 Выберите, за какой промежуток времени просмотреть статистику:'
+        return text + f' \n📊 Выберите, за какой промежуток времени просмотреть статистику:'
 
     @staticmethod
     def get_count_per_hours(time_word: str, hours: int):

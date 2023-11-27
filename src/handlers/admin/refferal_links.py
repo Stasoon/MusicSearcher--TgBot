@@ -6,6 +6,7 @@ from aiogram.types import KeyboardButton, InlineKeyboardButton, InlineKeyboardMa
 from src.misc.admin_states import ReferralLinkStates
 from src.database.reflinks import create_reflink, is_reflink_exists, get_all_links, delete_reflink
 
+
 reflinks_callback_data = CallbackData('referral_links', 'action')
 delete_reflink_callback_data = CallbackData('referral_links', 'link_name')
 

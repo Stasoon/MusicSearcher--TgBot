@@ -25,7 +25,7 @@ class Song(VkItem):
         title = str(item["title"])
         artist = str(item["artist"])
         duration = int(item["duration"])
-        track_id = int(item["id"])
+        track_id = int(item["id"]) if item.get('id') else item["song_id"]
         owner_id = int(item["owner_id"])
         url = str(item["url"])
 

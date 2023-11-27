@@ -14,7 +14,7 @@ from src.misc.callback_data import VkProfileCallback, PlaylistCallback, PagesNav
 from src.misc.user_states import VkProfileAddingStates
 from src.utils.vk_parsing.VkProfileParser import VkProfileParser, ProfileLinkValidator
 from src.utils.vkpymusic import SessionsManager, Playlist
-from config.config import redis_client
+from src.utils.cache_songs import redis_client
 
 
 # region Utils

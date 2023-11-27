@@ -1,10 +1,12 @@
 import re
+import json
 
 from aiogram.utils.exceptions import NetworkError, FileIsTooBig, BadRequest
 from aiogram.types import Message, InputFile, CallbackQuery
 from aiogram.utils.markdown import quote_html
 from aiogram import Dispatcher
 
+from src.utils.cache_songs import get_cached_songs_for_request, cache_request, get_cached_song
 from src.utils.message_utils import send_audio_message, send_and_delete_timer, get_media_file_url, send_advertisement
 from src.messages.user import UserMessages
 from src.utils.vkpymusic import SessionsManager, Song
@@ -15,10 +17,6 @@ from src.middlewares.throttling import rate_limit
 from src.keyboards.user import UserKeyboards
 from src.filters import IsSubscriberFilter
 from src.database import songs_hashes
-
-
-import json
-
 from src.utils.vkpymusic.Session import CaptchaNeeded
 
 
@@ -66,6 +64,35 @@ async def __send_recognized_song(message: Message, file_url: str):
         logger.error(e)
         await message.answer(text=UserMessages.get_song_not_found_error(), parse_mode='HTML')
 
+############################################################
+# from mutagen import File
+# import io
+#
+# def get_thumb(url: str):
+#     resp = requests.get(url)
+#     print(url)
+#     virtual_file = io.BytesIO(resp.content)
+#
+#     # Укажите путь к вашему mp3-файлу
+#     audio = File(virtual_file)
+#     print(audio.__dict__)
+#
+#     # Проверяем, есть ли в файле обложка
+#     for key in audio.keys():
+#         if 'APIC:' in key:
+#             # Извлекаем обложку
+#             cover_data = audio['APIC:3.jpeg'].data
+#             return InputFile(cover_data)
+#             # with open(cover_filename, 'wb') as fp:
+#             #
+#             #     fp.write(cover_data)
+#             #     print("Обложка сохранена как ", cover_filename)
+#             #     break
+#     else:
+#         print('нету')
+#         return None
+############################################################
+
 
 # region Handlers
 
@@ -73,12 +100,21 @@ async def __send_recognized_song(message: Message, file_url: str):
 async def handle_text_message(message: Message):
     await message.answer_chat_action(action='typing')
 
-    service = await SessionsManager().get_available_service()
-    try:
-        found_count, songs = await service.search_songs_by_text(text=message.text, count=SONGS_PER_PAGE)
-    except CaptchaNeeded as e:
-        await send_error_notification(e=e, message=message)
-        found_count, songs = 0, []
+    # Пробуем получить песни из кэша
+    found_count, songs_from_cache = await get_cached_songs_for_request(q=message.text, count=SONGS_PER_PAGE, offset=0)
+    # Иначе делаем запрос к API
+    if not songs_from_cache:
+        service = await SessionsManager().get_available_service()
+        try:
+            found_count, songs = await service.search_songs_by_text(
+                text=message.text, count=MAX_SONG_PAGES_COUNT*SONGS_PER_PAGE
+            )
+        except CaptchaNeeded as e:
+            await send_error_notification(e=e, message=message)
+            found_count, songs = 0, []
+        await cache_request(q=message.text, songs=songs)
+    else:
+        songs = songs_from_cache
 
     possible_pages_cnt = found_count // SONGS_PER_PAGE if found_count >= SONGS_PER_PAGE else 1
     max_pages = (
@@ -91,7 +127,7 @@ async def handle_text_message(message: Message):
         await message.reply(text=UserMessages.get_song_not_found_error(), parse_mode='HTML')
         return
 
-    markup = UserKeyboards.get_found_songs(songs, current_page_num=1, max_pages=max_pages)
+    markup = UserKeyboards.get_found_songs(songs[:SONGS_PER_PAGE], current_page_num=1, max_pages=max_pages)
     await message.answer(text=quote_html(message.text), reply_markup=markup)
 
 
@@ -140,7 +176,9 @@ async def handle_show_song_callback(callback: CallbackQuery, callback_data: Song
 
     if not file:
         service = await SessionsManager().get_available_service()
-        song = await service.get_song(owner_id=owner_id, audio_id=song_id)
+        song = await get_cached_song(f"{owner_id}_{song_id}")
+        if not song:
+            song = await service.get_song(owner_id=owner_id, audio_id=song_id)
 
         if not song:
             await callback.message.answer(UserMessages.get_song_not_found_error())

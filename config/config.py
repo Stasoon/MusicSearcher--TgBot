@@ -1,7 +1,6 @@
 import os
 from typing import Final
 
-import redis
 from dotenv import load_dotenv, find_dotenv
 
 from .paths_config import PathsConfig
@@ -24,5 +23,3 @@ with open('vk_tokens.txt') as file:
 
 
 i18n = I18nMiddleware(domain='messages', path=PathsConfig.LOCALES_DIR, default='ru')
-
-redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
