@@ -36,10 +36,6 @@ class Song(VkItem):
         )
         return song
 
-    def to_safe(self):
-        def safe_format(string):
-            safe_string = re.sub(r"[^A-zА-я0-9+\s]", "", string)
-            return safe_string
-
-        self.title = safe_format(self.title)
-        self.artist = safe_format(self.artist)
+    def get_file_name(self) -> str:
+        safe_name = re.sub(r"[^A-zА-я0-9+\s]", "", str(self))
+        return f"{safe_name}.mp3"

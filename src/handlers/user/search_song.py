@@ -44,10 +44,15 @@ def get_song_file(song: Song) -> InputFile | str:
 
 
 async def __send_recognized_song(message: Message, file_url: str):
-    song_data = await shazam_api.recognize_song(file_url=file_url)
+    try:
+        song_data = await shazam_api.recognize_song(file_url=file_url)
+    except Exception:
+        await message.answer(text=UserMessages.get_song_not_found_error(), parse_mode='HTML')
+        return
 
     if not song_data:
         await message.answer(text=UserMessages.get_song_not_found_error(), parse_mode='HTML')
+        return
 
     service = await SessionsManager().get_available_service()
     try:
@@ -101,7 +106,8 @@ async def handle_text_message(message: Message):
     await message.answer_chat_action(action='typing')
 
     # Пробуем получить песни из кэша
-    found_count, songs_from_cache = await get_cached_songs_for_request(q=message.text, count=SONGS_PER_PAGE, offset=0)
+    found_count, songs_from_cache = get_cached_songs_for_request(q=message.text, count=SONGS_PER_PAGE, offset=0)
+
     # Иначе делаем запрос к API
     if not songs_from_cache:
         service = await SessionsManager().get_available_service()
@@ -112,7 +118,10 @@ async def handle_text_message(message: Message):
         except CaptchaNeeded as e:
             await send_error_notification(e=e, message=message)
             found_count, songs = 0, []
-        await cache_request(q=message.text, songs=songs)
+        except Exception as e:
+            await send_error_notification(e=e, message=message)
+            found_count, songs = 0, []
+        cache_request(q=message.text, songs=songs)
     else:
         songs = songs_from_cache
 
@@ -124,6 +133,7 @@ async def handle_text_message(message: Message):
     )
 
     if not songs:
+        await send_error_notification(e="Песня не найдена\n", message=message)
         await message.reply(text=UserMessages.get_song_not_found_error(), parse_mode='HTML')
         return
 
@@ -175,16 +185,17 @@ async def handle_show_song_callback(callback: CallbackQuery, callback_data: Song
     song = None
 
     if not file:
-        service = await SessionsManager().get_available_service()
-        song = await get_cached_song(f"{owner_id}_{song_id}")
+        song = get_cached_song(key=f"{owner_id}_{song_id}")
+
         if not song:
+            service = await SessionsManager().get_available_service()
             song = await service.get_song(owner_id=owner_id, audio_id=song_id)
 
         if not song:
             await callback.message.answer(UserMessages.get_song_not_found_error())
             return
 
-        file = InputFile.from_url(url=song.url, filename=song.title)
+        file = InputFile.from_url(song.url, filename=song.get_file_name())
         song_title = song.title
         artist = song.artist
 

@@ -149,7 +149,8 @@ async def handle_show_profile_playlists_callback(callback: CallbackQuery, callba
 
     # Сохраняем плейлисты в Redis
     for playlist in profile_playlists:
-        redis_client.set(f'playlist_{playlist.playlist_id}_{playlist.owner_id}', value=json.dumps(playlist.to_dict()), ex=8600)
+        redis_client.setex(name=f'playlist_{playlist.playlist_id}_{playlist.owner_id}',
+                               value=json.dumps(playlist.to_dict()), time=8600)
 
     # Формируем сообщение и отправляем
     markup = UserKeyboards.get_found_playlists(

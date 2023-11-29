@@ -43,7 +43,7 @@ async def get_next_page_songs(
 ) -> list[Song]:
     match category:
         case 'search':
-            count, songs = await get_cached_songs_for_request(
+            count, songs = get_cached_songs_for_request(
                 q=callback.message.text, count=songs_per_page, offset=offset
             )
             if not songs:
