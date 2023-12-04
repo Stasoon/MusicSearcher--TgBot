@@ -6,8 +6,8 @@ from aiogram.utils.callback_data import CallbackData
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.exceptions import Unauthorized
 
-from src.misc.admin_states import ChannelAdding
-from src.database.channel import get_channels, save_channel, delete_channel
+from src.misc.admin_states import SubscriptionChannelAdding
+from src.database.subscription_channels import get_channels, save_channel, delete_channel
 
 
 # region AddChannels
@@ -59,7 +59,7 @@ class Handlers:
         await callback.message.answer('1) Пригласите бота в нужный канал \n'
                                       '2) Назначьте его администратором, чтобы он мог видеть участников \n'
                                       '3) Перешлите сюда любой пост из канала', reply_markup=Keyboards.cancel_markup)
-        await state.set_state(ChannelAdding.wait_for_post)
+        await state.set_state(SubscriptionChannelAdding.wait_for_post)
 
     @staticmethod
     async def __handle_channel_post_message(message: types.Message, state: FSMContext):
@@ -83,7 +83,7 @@ class Handlers:
             await state.update_data(channel_id=channel.id, title=channel.title)
             await message.answer('Теперь пришлите ссылку, по которой будут вступать пользователи:',
                                  reply_markup=Keyboards.cancel_markup)
-            await state.set_state(ChannelAdding.wait_for_url)
+            await state.set_state(SubscriptionChannelAdding.wait_for_url)
 
     @staticmethod
     async def __handle_message_with_url(message: types.Message, state: FSMContext):
@@ -129,13 +129,13 @@ class Handlers:
         dp.register_message_handler(cls.__handle_channel_post_message,
                                     is_admin=True,
                                     content_types=['any'],
-                                    state=ChannelAdding.wait_for_post)
+                                    state=SubscriptionChannelAdding.wait_for_post)
 
         # обработка сообщения со ссылкой
         dp.register_message_handler(cls.__handle_message_with_url,
                                     is_admin=True,
                                     content_types=['text'],
-                                    state=ChannelAdding.wait_for_url)
+                                    state=SubscriptionChannelAdding.wait_for_url)
 
         # обработка калбэка отмены добавления канала
         dp.register_callback_query_handler(cls.__handle_cancel_callback, text='cancel', state='*')

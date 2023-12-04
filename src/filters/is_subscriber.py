@@ -3,7 +3,8 @@ from aiogram.utils.exceptions import Unauthorized, ChatNotFound, BotKicked
 from aiogram.dispatcher.filters import BoundFilter
 from aiogram import Bot
 
-from src.database.channel import get_channels, get_channel_ids
+from src.database.subscription_channels import get_channels, get_channel_ids
+from src.database.subscriptions import has_subscription
 from src.utils import logger
 
 
@@ -37,6 +38,9 @@ class IsSubscriberFilter(BoundFilter):
         self.is_sub = should_be_subscriber
 
     async def check(self, callback: CallbackQuery):
+        if has_subscription(user_id=callback.from_user.id):
+            return self.is_sub is True
+
         for channel_id in get_channel_ids():
             if not await check_status_in_channel_is_member(callback.bot, channel_id, callback.from_user.id):
                 return self.is_sub is False

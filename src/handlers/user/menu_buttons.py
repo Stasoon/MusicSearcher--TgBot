@@ -33,7 +33,7 @@ def calculate_page_to_show_number(callback_data: PagesNavigationCallback) -> int
     return page_to_show_num
 
 
-#################   РАЗДЕЛИТЬ ЭТО ПО МОДУЛЯМ
+#################   РАЗДЕЛИТЬ ПО МОДУЛЯМ
 async def get_next_page_songs(
         category: Literal['new', 'popular', 'search'],
         callback: CallbackQuery,
@@ -47,13 +47,8 @@ async def get_next_page_songs(
                 q=callback.message.text, count=songs_per_page, offset=offset
             )
             if not songs:
-                service = await SessionsManager().get_available_service()
-                try:
-                    count, songs = await service.search_songs_by_text(
-                        text=callback.message.text, count=songs_per_page, offset=offset
-                    )
-                except CaptchaNeeded:
-                    songs = []
+                await callback.answer('Запрос устарел. Повторите поиск')
+                return []
             return songs
         case 'popular' | 'new':
             return song_catalogs.get_songs_from_catalog(category=category, count=songs_per_page, offset=offset)

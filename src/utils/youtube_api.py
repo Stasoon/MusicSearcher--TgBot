@@ -1,3 +1,8 @@
 from pytube import YouTube
 
-YouTube('http://youtube.com/watch?v=9bZkp7q19f0').streams[0].download()
+
+async def get_download_link(url: str) -> str | None:
+    yt = YouTube(url)
+    video = yt.streams.filter(file_extension='mp4').first()
+    print(video.url)
+    return video.url or None

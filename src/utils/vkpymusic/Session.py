@@ -15,11 +15,33 @@ class CaptchaNeeded(Exception):
         super().__init__(self.message)
 
 
+class SessionAuthorizationFailed(Exception):
+    def __init__(self, message: str, session_token: str):
+        self.message = message
+        self.session_token = session_token
+        super().__init__(f"{self.message} \nТокен сессии: \n{session_token}")
+
+
 class Session:
     def __init__(self, name: str, token_for_audio: str, captcha_decoder: BaseCaptchaDecoder):
         self.name = name
         self.__token = token_for_audio
         self.captcha_decoder = captcha_decoder
+
+    async def __process_api_error(self, method, params, error: dict):
+        # Если ошибка - требование ввести капчу, повторяем запрос,
+        # передавая старые параметры и данные решённой капчи
+        if error.get('error_msg') == 'Captcha needed':
+            captcha_sid = error.get('captcha_sid')
+            captcha_url = error.get('captcha_img')
+            captcha_bytes = await self.captcha_decoder.get_bytes_from_captcha_url(captcha_url)
+            captcha_key = await self.captcha_decoder.get_captcha_key(captcha_bytes)
+            params.update(captcha_sid=captcha_sid, captcha_key=captcha_key)
+            await self.__get_response_content(method, params=params)
+            raise CaptchaNeeded
+        # Ошибка авторизации
+        elif error.get('error_code') == 5:
+            raise SessionAuthorizationFailed(error.get('error_msg'), self.__token)
 
     ##########################
     # COMMON REQUEST FOR AUDIO
@@ -39,16 +61,7 @@ class Session:
             async with session.post(api_url, data=api_parameters, headers=headers) as response:
                 content = await response.json()
                 if error := content.get('error'):
-                    # Если ошибка - требование ввести капчу, повторяем запрос,
-                    # передавая старые параметры и данные решённой капчи
-                    if error.get('error_msg') == 'Captcha needed':
-                        captcha_sid = error.get('captcha_sid')
-                        captcha_url = error.get('captcha_img')
-                        captcha_bytes = await self.captcha_decoder.get_bytes_from_captcha_url(captcha_url)
-                        captcha_key = await self.captcha_decoder.get_captcha_key(captcha_bytes)
-                        params.update(captcha_sid=captcha_sid, captcha_key=captcha_key)
-                        await self.__get_response_content(method, params=params)
-                        raise CaptchaNeeded
+                    await self.__process_api_error(method=method, params=params, error=error)
                 return content
 
     ##############
@@ -148,8 +161,8 @@ class Session:
             response = await self.__search(text, count, offset)
             results_count = response['response']['count']
             songs = self.__fetch_songs_from_response(response)
-        except CaptchaNeeded:
-            raise CaptchaNeeded
+        except (CaptchaNeeded, SessionAuthorizationFailed) as e:
+            raise e
         except Exception as e:
             logger.error(e)
             return 0, []

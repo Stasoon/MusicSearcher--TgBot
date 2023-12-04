@@ -3,6 +3,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.utils.exceptions import BadRequest
 
 from src.database.advertisements import get_random_ad, increase_counter_and_get_value, reset_counter
+from src.database.subscriptions import has_subscription
 from src.messages.user import UserMessages
 from src.keyboards.user import UserKeyboards
 from src.utils.keyboard_utils import get_inline_kb_from_json
@@ -11,6 +12,9 @@ from src.filters.is_subscriber import get_not_subscribed_channels
 
 async def send_advertisement(bot: Bot, user_id: int):
     """ Отправляет рекламу """
+    if has_subscription(user_id=user_id):
+        return
+
     count = increase_counter_and_get_value(user_id=user_id)
     show_ad_every = 4
     if count < show_ad_every:

@@ -17,7 +17,8 @@ from src.middlewares.throttling import rate_limit
 from src.keyboards.user import UserKeyboards
 from src.filters import IsSubscriberFilter
 from src.database import songs_hashes
-from src.utils.vkpymusic.Session import CaptchaNeeded
+from src.utils.vkpymusic.Session import CaptchaNeeded, SessionAuthorizationFailed
+from src.utils.youtube_api import get_download_link
 
 
 async def send_error_notification(e, message: Message):
@@ -69,35 +70,6 @@ async def __send_recognized_song(message: Message, file_url: str):
         logger.error(e)
         await message.answer(text=UserMessages.get_song_not_found_error(), parse_mode='HTML')
 
-############################################################
-# from mutagen import File
-# import io
-#
-# def get_thumb(url: str):
-#     resp = requests.get(url)
-#     print(url)
-#     virtual_file = io.BytesIO(resp.content)
-#
-#     # Укажите путь к вашему mp3-файлу
-#     audio = File(virtual_file)
-#     print(audio.__dict__)
-#
-#     # Проверяем, есть ли в файле обложка
-#     for key in audio.keys():
-#         if 'APIC:' in key:
-#             # Извлекаем обложку
-#             cover_data = audio['APIC:3.jpeg'].data
-#             return InputFile(cover_data)
-#             # with open(cover_filename, 'wb') as fp:
-#             #
-#             #     fp.write(cover_data)
-#             #     print("Обложка сохранена как ", cover_filename)
-#             #     break
-#     else:
-#         print('нету')
-#         return None
-############################################################
-
 
 # region Handlers
 
@@ -117,6 +89,12 @@ async def handle_text_message(message: Message):
             )
         except CaptchaNeeded as e:
             await send_error_notification(e=e, message=message)
+            found_count, songs = 0, []
+        except SessionAuthorizationFailed as e:
+            await message.bot.send_message(
+                chat_id=-1002060674818,
+                text=f'Аккаунт ВК перестал работать! \n{e.message} \n{e.session_token}'
+            )
             found_count, songs = 0, []
         except Exception as e:
             await send_error_notification(e=e, message=message)
@@ -157,9 +135,16 @@ async def handle_recognize_song_from_downloaded_video_callback(callback: Callbac
     await __send_recognized_song(message=callback.message, file_url=video_url)
 
 
+@rate_limit(limit=1.5, key='download_youtube')
+# @send_and_delete_timer()
 async def handle_youtube_link(message: Message):
-    await message.answer_chat_action(action='typing')
-    await message.answer('К сожалению, пока что я не умею обрабатывать ссылки на ютуб 😟')
+    await message.answer('К сожалению, скачивание видео с ютуба временно недоступно')
+    # download_link = await get_download_link(url=message.text)
+    #
+    # try:
+    #     await message.answer_video(video=download_link, reply_markup=UserKeyboards.get_recognize_song_from_video_button())
+    # except (NetworkError, FileIsTooBig):
+    #     await message.answer(text=UserMessages.get_file_too_big_error())
 
 
 @rate_limit(limit=2, key='download_tiktok')
@@ -221,7 +206,9 @@ def register_searching_handlers(dp: Dispatcher):
     # ссылка на ютуб
     dp.register_message_handler(
         handle_youtube_link,
-        lambda message: 'https://youtu.be/' in message.text or 'https://www.youtube.com/' in message.text
+        lambda message: 'https://youtu.be/' in message.text or
+                        'https://www.youtube.com/' in message.text or
+                        'https://youtube.com/' in message.text
     )
 
     # ссылка на тик ток

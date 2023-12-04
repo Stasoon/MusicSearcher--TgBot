@@ -7,7 +7,7 @@ from .search_song import register_searching_handlers
 from .profiles import register_profiles_handlers
 from .inline_mode import register_inline_mode_handlers
 from .not_subscribers import register_not_subs_handlers
-from .auto_welcome import register_auto_welcome_handlers
+from .join_requests_approving import register_join_requests_approving_handlers
 
 
 def register_user_handlers(dp: Dispatcher):
@@ -19,7 +19,7 @@ def register_user_handlers(dp: Dispatcher):
         register_searching_handlers,
         register_not_subs_handlers,
         register_inline_mode_handlers,
-        # register_auto_welcome_handlers
+        register_join_requests_approving_handlers
     ]
 
     for handler in handlers:

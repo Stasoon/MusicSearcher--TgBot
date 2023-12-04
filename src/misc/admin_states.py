@@ -5,9 +5,24 @@ class StatsGetting(StatesGroup):
     wait_for_hours_count = State()
 
 
-class ChannelAdding(StatesGroup):
+class SubscriptionChannelAdding(StatesGroup):
     wait_for_post = State()
     wait_for_url = State()
+
+
+class BotSubscriptionStates(StatesGroup):
+    id_to_give_subscription = State()
+
+
+class JoinRequestChannelAdding(StatesGroup):
+    wait_for_post = State()
+    wait_for_invite_link = State()
+    wait_for_welcome_text = State()
+
+
+class JoinRequestChannelEditing(StatesGroup):
+    edit_invite_link = State()
+    edit_welcome_text = State()
 
 
 class AdminAdding(StatesGroup):

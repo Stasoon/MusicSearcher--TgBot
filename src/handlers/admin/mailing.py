@@ -7,6 +7,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.utils.exceptions import RetryAfter
 from aiogram.types import KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery
 
+from src.database.subscriptions import get_users_with_subscription
 from src.misc.admin_states import MailingPostCreating
 from src.database.users import get_user_ids, get_users_total_count
 from src.utils import logger
@@ -95,10 +96,12 @@ class Mailer:
     async def start_mailing(cls, bot: Bot, to_user_ids: Iterable, message_id: int, from_chat_id: int,
                             markup: InlineKeyboardMarkup = None) -> int:
         successful_count = 0
-        print(to_user_ids)
+        users_with_subscription = {user.telegram_id for user in get_users_with_subscription()}
         try:
             for user_id in to_user_ids:
-                print(user_id)
+                if user_id in users_with_subscription:
+                    continue
+
                 if await Utils.send_message_to_user(bot, user_id, from_chat_id, message_id, markup):
                     successful_count += 1
                 await asyncio.sleep(0.05)
