@@ -2,8 +2,8 @@ import json
 
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Command
-from aiogram.types import Message, CallbackQuery
+from aiogram.dispatcher.filters import Command, ChatTypeFilter
+from aiogram.types import Message, CallbackQuery, ChatType
 from aiogram.utils.exceptions import BadRequest
 
 from src.database import vk_profiles
@@ -117,7 +117,7 @@ async def handle_show_profile_audios_callback(callback: CallbackQuery, callback_
     profile = vk_profiles.get_profile(profile_id)
 
     service = await SessionsManager().get_available_service()
-    songs_count, profile_songs = await service.get_profile_songs(user_id=profile_id, count=8)
+    songs_count, profile_songs = await service.get_profile_songs(profile_id=profile_id, count=8)
 
     if not profile_songs:
         await __send_profile_is_private(callback)
@@ -149,8 +149,10 @@ async def handle_show_profile_playlists_callback(callback: CallbackQuery, callba
 
     # Сохраняем плейлисты в Redis
     for playlist in profile_playlists:
-        redis_client.setex(name=f'playlist_{playlist.playlist_id}_{playlist.owner_id}',
-                               value=json.dumps(playlist.to_dict()), time=8600)
+        redis_client.setex(
+            name=f'playlist_{playlist.playlist_id}_{playlist.owner_id}',
+            value=json.dumps(playlist.to_dict()), time=8600
+        )
 
     # Формируем сообщение и отправляем
     markup = UserKeyboards.get_found_playlists(
@@ -254,7 +256,8 @@ def register_profiles_handlers(dp: Dispatcher):
     )
 
     # Команда /profiles
-    dp.register_message_handler(handle_profiles_command, Command("profiles"), state='*')
+    dp.register_message_handler(
+        handle_profiles_command, Command("profiles"), ChatTypeFilter(ChatType.PRIVATE,), state='*')
 
     # Нажатие на профиль
     dp.register_callback_query_handler(handle_show_profile_callback, VkProfileCallback.filter(action='show'))

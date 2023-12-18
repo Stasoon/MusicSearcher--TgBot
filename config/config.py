@@ -15,6 +15,7 @@ class Config:
     ADMIN_IDS: Final = [int(adm_id) for adm_id in os.getenv('ADMIN_IDS').strip().split(',')]
 
     RUCAPTCHA_TOKEN = os.getenv('RUCAPTCHA_TOKEN')
+    LOGS_CHAT_ID: Final[int] = os.getenv('LOGS_CHAT_ID')
     VK_TOKENS: list[str] = []
 
 

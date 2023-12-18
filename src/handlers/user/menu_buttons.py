@@ -1,10 +1,12 @@
 from typing import Literal
 
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Text
-from aiogram.types import Message, CallbackQuery
+from aiogram.dispatcher.filters import Text, ChatTypeFilter
+from aiogram.types import Message, CallbackQuery, ChatType
 from aiogram import Dispatcher
+from aiogram.utils.exceptions import MessageNotModified
 
+from src.middlewares.throttling import rate_limit
 from src.misc.callback_data import PagesNavigationCallback
 from src.database import song_catalogs
 from src.keyboards.user import UserKeyboards
@@ -44,7 +46,7 @@ async def get_next_page_songs(
     match category:
         case 'search':
             count, songs = get_cached_songs_for_request(
-                q=callback.message.text, count=songs_per_page, offset=offset
+                q=target_data, count=songs_per_page, offset=offset, query_hashed=True
             )
             if not songs:
                 await callback.answer('Запрос устарел. Повторите поиск')
@@ -55,7 +57,7 @@ async def get_next_page_songs(
         case 'profile_songs':
             service = await SessionsManager().get_available_service()
             count, songs = await service.get_profile_songs(
-                user_id=target_data, count=songs_per_page, offset=offset
+                profile_id=target_data, count=songs_per_page, offset=offset
             )
             return songs
 
@@ -66,9 +68,9 @@ async def get_next_page_songs(
 # region Menu
 
 
+@rate_limit(limit=0.4, key='new')
 async def handle_new_songs_button(message: Message, state: FSMContext):
     await state.finish()
-    await message.answer_chat_action(action='typing')
 
     songs = song_catalogs.get_songs_from_catalog('new', count=SONGS_PER_PAGE, offset=0)
     text = UserMessages.get_new_songs()
@@ -77,9 +79,9 @@ async def handle_new_songs_button(message: Message, state: FSMContext):
     await message.answer(text=text, reply_markup=markup, parse_mode='HTML')
 
 
+@rate_limit(limit=0.4, key='popular')
 async def handle_popular_songs_button(message: Message, state: FSMContext):
     await state.finish()
-    await message.answer_chat_action(action='typing')
 
     songs = song_catalogs.get_songs_from_catalog(category='popular', count=SONGS_PER_PAGE, offset=0)
     text = UserMessages.get_popular_songs()
@@ -90,10 +92,10 @@ async def handle_popular_songs_button(message: Message, state: FSMContext):
 
 async def handle_search_song_button(message: Message, state: FSMContext):
     await state.finish()
-    await message.answer_chat_action(action='typing')
     await message.answer(text=UserMessages.get_search_song(), parse_mode='HTML')
 
 
+@rate_limit(limit=0.4, key='popular')
 async def handle_songs_navigation_callbacks(callback: CallbackQuery, callback_data: PagesNavigationCallback):
     # Рассчитываем смещение
     songs_per_page = int(callback_data.get('count_per_page'))
@@ -115,7 +117,10 @@ async def handle_songs_navigation_callbacks(callback: CallbackQuery, callback_da
         category=callback_data.get('category'), max_pages=int(callback_data.get('max_pages')),
         target_data=target_data
     )
-    await callback.message.edit_reply_markup(reply_markup=markup)
+    try:
+        await callback.message.edit_reply_markup(reply_markup=markup)
+    except MessageNotModified:
+        return
 
 
 async def handle_empty_callbacks(callback: CallbackQuery):
@@ -139,9 +144,18 @@ def register_navigation_handlers(dp: Dispatcher):
     )
 
     # Кнопки меню
-    dp.register_message_handler(handle_new_songs_button, Text(equals=__("🎶 Новинки")), state='*')
-    dp.register_message_handler(handle_popular_songs_button, Text(equals=__("🎧 Популярное")), state='*')
-    dp.register_message_handler(handle_search_song_button, Text(equals=__("🔍 Поиск")), state='*')
+    dp.register_message_handler(
+        handle_new_songs_button, ChatTypeFilter(ChatType.PRIVATE,), Text(equals=__("🎶 Новинки")), state='*')
+    dp.register_message_handler(
+        handle_new_songs_button, ChatTypeFilter((ChatType.GROUP, ChatType.SUPERGROUP)), commands=['new'])
+
+    dp.register_message_handler(
+        handle_popular_songs_button, ChatTypeFilter(ChatType.PRIVATE,), Text(equals=__("🎧 Популярное")), state='*')
+    dp.register_message_handler(
+        handle_popular_songs_button, ChatTypeFilter((ChatType.GROUP, ChatType.SUPERGROUP)), commands=['popular'])
+
+    dp.register_message_handler(
+        handle_search_song_button, ChatTypeFilter(ChatType.PRIVATE,), Text(equals=__("🔍 Поиск")), state='*')
 
     # Навигация по страницам с песнями
     dp.register_callback_query_handler(

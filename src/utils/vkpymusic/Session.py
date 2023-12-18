@@ -31,6 +31,8 @@ class Session:
     async def __process_api_error(self, method, params, error: dict):
         # Если ошибка - требование ввести капчу, повторяем запрос,
         # передавая старые параметры и данные решённой капчи
+        logger.error(f"Ошибка при запросе к API ВК: \n{error} \n{params}")
+
         if error.get('error_msg') == 'Captcha needed':
             captcha_sid = error.get('captcha_sid')
             captcha_url = error.get('captcha_img')
@@ -42,6 +44,8 @@ class Session:
         # Ошибка авторизации
         elif error.get('error_code') == 5:
             raise SessionAuthorizationFailed(error.get('error_msg'), self.__token)
+        else:
+            logger.error(error)
 
     ##########################
     # COMMON REQUEST FOR AUDIO
@@ -131,21 +135,20 @@ class Session:
             content = content['response'][0]
             song = Song.from_json(content)
         except Exception as e:
-            logger.error(f"{e}")
             logger.error(e)
             return
         return song
 
     async def get_profile_songs(
-            self, user_id: int, count: int = 8, offset: int = 0
+            self, profile_id: int, count: int = 8, offset: int = 0
     ) -> tuple[int, List[Song]]:
         """
         Поиск песен по owner/user id.
         """
-        user_id = int(user_id)
+        profile_id = int(profile_id)
 
         try:
-            response = await self.__get(user_id, count, offset)
+            response = await self.__get(profile_id, count, offset)
             results_count = response['response']['count']
             songs = self.__fetch_songs_from_response(response)
         except Exception:

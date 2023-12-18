@@ -2,6 +2,7 @@ import asyncio
 
 from aiocron import crontab
 from aiogram import executor
+from aiogram.types import AllowedUpdates
 
 from src.middlewares.throttling import ThrottlingMiddleware
 from src.set_bot_commands import set_bot_commands
@@ -24,8 +25,8 @@ async def on_startup(_):
     await set_bot_commands(bot=bot)
 
     # Регистрация middlewares
+    dp.middleware.setup(ThrottlingMiddleware())
     dp.middleware.setup(i18n)
-    # dp.middleware.setup(ThrottlingMiddleware())
 
     # Регистрация фильтров
     register_all_filters(dp)
@@ -55,6 +56,10 @@ async def on_shutdown(_):
 
 def start_bot():
     try:
-        executor.start_polling(dispatcher=dp, on_startup=on_startup, on_shutdown=on_shutdown, skip_updates=True)
+        executor.start_polling(
+            dispatcher=dp,
+            on_startup=on_startup, on_shutdown=on_shutdown, skip_updates=True,
+            allowed_updates=AllowedUpdates.all()
+        )
     except Exception as e:
         logger.exception(e)

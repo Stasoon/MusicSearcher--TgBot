@@ -1,5 +1,5 @@
 from peewee import (
-    Model, PostgresqlDatabase, AutoField,
+    Model, PostgresqlDatabase, SqliteDatabase, AutoField,
     SmallIntegerField, BigIntegerField, IntegerField,
     DateTimeField, CharField, TextField, BooleanField,
     ForeignKeyField
@@ -7,10 +7,11 @@ from peewee import (
 from config import DatabaseConfig
 
 
-db = PostgresqlDatabase(
-    DatabaseConfig.NAME,
-    user=DatabaseConfig.USER, password=DatabaseConfig.PASSWORD,
-    host=DatabaseConfig.HOST, port=DatabaseConfig.PORT
+db = SqliteDatabase(
+    database='data.db'
+    # DatabaseConfig.NAME,
+    # user=DatabaseConfig.USER, password=DatabaseConfig.PASSWORD,
+    # host=DatabaseConfig.HOST, port=DatabaseConfig.PORT
 )
 
 
@@ -30,6 +31,11 @@ class User(_BaseModel):
     lang_code = CharField(max_length=2, null=True, default=None)
     referral_link = CharField(null=True)
     registration_timestamp = DateTimeField()
+
+
+class BotChat(_BaseModel):
+    """ Чаты, в которые добавлен бот """
+    chat_id = BigIntegerField(primary_key=True, unique=True, null=False)
 
 
 class Subscription(_BaseModel):
@@ -75,8 +81,9 @@ class JoinRequestChannel(_BaseModel):
 
     channel_id = BigIntegerField(primary_key=True)
     channel_title = CharField()
-    invite_link = CharField()
-    welcome_text = TextField()
+    welcome_text = TextField(null=True)
+    goodbye_text = TextField(null=True)
+    allow_approving = BooleanField(default=True)
     approved_requests_count = IntegerField(default=0)
 
 
@@ -99,7 +106,7 @@ class SubscriptionChannels(_BaseModel):
     url = CharField()
 
 
-class SongHash(_BaseModel):
+class SongCache(_BaseModel):
     """ Кэш песни, которая была отправлена пользователю """
     class Meta:
         db_table = 'songs_hashes'
@@ -141,6 +148,15 @@ class UserVkProfileRelation(_BaseModel):
     """ Отношение пользователь бота - сохранённый им профиль ВКонтакте """
     user = ForeignKeyField(User)
     vk_profile = ForeignKeyField(VkProfile)
+
+
+class YoutubeVideo(_BaseModel):
+    """ Реферальная ссылка """
+    class Meta:
+        db_table = 'youtube_videos'
+
+    video_id = CharField(unique=True)
+    file_id = CharField()
 
 
 def register_models() -> None:

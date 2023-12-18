@@ -7,6 +7,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.utils.exceptions import RetryAfter
 from aiogram.types import KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery
 
+from src.database.bot_chats import get_bot_chat_ids, get_bot_chats_count
 from src.database.subscriptions import get_users_with_subscription
 from src.misc.admin_states import MailingPostCreating
 from src.database.users import get_user_ids, get_users_total_count
@@ -64,12 +65,18 @@ FAQ telegram.org/faq | Скачать telegram.org/apps'''
         return "✅ <b>Рассылка началась!</b>"
 
     @staticmethod
-    def get_successful_mailed(successful_count: int):
-        total_count = get_users_total_count()
+    def get_successful_mailed(successful_count_users: int, successful_count_chats: int):
+        total_users_count = get_users_total_count()
+        total_chats_count = get_bot_chats_count()
+
         text = (
             "<b>✅ Рассылка завершена.</b> \n\n"
-            f"➕ Успешно: {successful_count} из {total_count} \n"
-            f"➖ Заблокировали: {total_count-successful_count} \n\n"
+            f"➕ Успешно: \n"
+            f"По пользователям: {successful_count_users} из {total_users_count} \n"
+            f"По чатам: {successful_count_chats} из {total_chats_count} \n\n"
+            f"➖ Заблокировали: \n"
+            f"Пользователи: {total_users_count-successful_count_users} \n"
+            f"Чаты: {total_chats_count-successful_count_chats} \n\n"
             f"📅 Дата окончания: \n<code>{datetime.now().strftime('%Y.%m.%d  %H:%M:%S')}</code>"
         )
         return text
@@ -170,16 +177,24 @@ class Handlers:
         data = await state.get_data()
         await state.finish()
 
-        successful_count = await Mailer.start_mailing(
+        successful_count_users = await Mailer.start_mailing(
             bot=callback.message.bot,
             to_user_ids=get_user_ids(),
             message_id=data.get('message_id'),
             from_chat_id=callback.from_user.id,
             markup=data.get('markup')
         )
+        successful_count_chats = await Mailer.start_mailing(
+            bot=callback.message.bot,
+            to_user_ids=get_bot_chat_ids(),
+            message_id=data.get('message_id'),
+            from_chat_id=callback.from_user.id,
+            markup=data.get('markup')
+        )
+
 
         await callback.message.answer(
-            text=Messages.get_successful_mailed(successful_count=successful_count),
+            text=Messages.get_successful_mailed(successful_count_users, successful_count_chats),
             parse_mode='HTML'
         )
 

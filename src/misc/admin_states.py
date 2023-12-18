@@ -12,17 +12,18 @@ class SubscriptionChannelAdding(StatesGroup):
 
 class BotSubscriptionStates(StatesGroup):
     id_to_give_subscription = State()
+    id_to_take_back_subscription = State()
 
 
 class JoinRequestChannelAdding(StatesGroup):
     wait_for_post = State()
-    wait_for_invite_link = State()
     wait_for_welcome_text = State()
+    wait_for_goodbye_text = State()
 
 
 class JoinRequestChannelEditing(StatesGroup):
-    edit_invite_link = State()
     edit_welcome_text = State()
+    edit_goodbye_text = State()
 
 
 class AdminAdding(StatesGroup):

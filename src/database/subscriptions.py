@@ -19,3 +19,12 @@ def has_subscription(user_id) -> bool:
 def get_users_with_subscription() -> list[User]:
     """ Получение списка пользователей с подпиской """
     return User.select().join(Subscription).distinct()
+
+
+def remove_subscription(user_id: int) -> bool:
+    """ Отменить подписку """
+    subscription = Subscription.get_or_none(Subscription.subscriber == user_id)
+    if not subscription:
+        return False
+    subscription.delete_instance()
+    return True

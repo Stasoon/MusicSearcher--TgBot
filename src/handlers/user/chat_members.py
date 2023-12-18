@@ -1,42 +1,42 @@
 from aiogram import Dispatcher
-from aiogram.types import ChatMemberUpdated, ContentType
+from aiogram.types import ChatMemberUpdated, ChatJoinRequest
 
-from src.create_bot import dp
-
-
-async def handle_new_chat_member(update: ChatMemberUpdated):
-    pass
-    # {"message_id": 999,
-    #  "from": {"id": 5815704115, "is_bot": false, "first_name": "Миша", "last_name": "Смирнов", "username": "mihasmirn",
-    #           "language_code": "ru"},
-    #  "chat": {"id": -4030233224, "title": "dsfsdgbfh", "type": "group", "all_members_are_administrators": true},
-    #  "date": 1701521308,
-    #  "new_chat_participant": {"id": 5815704115, "is_bot": false, "first_name": "Миша", "last_name": "Смирнов",
-    #                           "username": "mihasmirn", "language_code": "ru"},
-    #  "new_chat_member": {"id": 5815704115, "is_bot": false, "first_name": "Миша", "last_name": "Смирнов",
-    #                      "username": "mihasmirn", "language_code": "ru"}, "new_chat_members": [
-    #     {"id": 5815704115, "is_bot": false, "first_name": "Миша", "last_name": "Смирнов", "username": "mihasmirn",
-    #      "language_code": "ru"}]}
+from src.database import join_request_channels
+from src.database.users import create_user_if_not_exist
 
 
 async def handle_left_chat_member(update: ChatMemberUpdated):
-    print(update)
-    # {"message_id": 1000,
-    #  "from": {"id": 5815704115, "is_bot": false, "first_name": "Миша", "last_name": "Смирнов", "username": "mihasmirn",
-    #           "language_code": "ru"},
-    #  "chat": {"id": -4030233224, "title": "dsfsdgbfh", "type": "group", "all_members_are_administrators": true},
-    #  "date": 1701521355,
-    #  "left_chat_participant": {"id": 5815704115, "is_bot": false, "first_name": "Миша", "last_name": "Смирнов",
-    #                            "username": "mihasmirn", "language_code": "ru"},
-    #  "left_chat_member": {"id": 5815704115, "is_bot": false, "first_name": "Миша", "last_name": "Смирнов",
-    #                       "username": "mihasmirn", "language_code": "ru"}}\
+    chat = join_request_channels.get_join_request_channel_or_none(channel_id=update.chat.id)
+
+    if chat and chat.goodbye_text:
+        await update.bot.send_message(
+            chat_id=update.old_chat_member.user.id, text=chat.goodbye_text
+        )
 
 
-@dp.chat_member_handler()
-async def some_handler(msg: ChatMemberUpdated):
-    print(msg)
+async def handle_join_request(join_request: ChatJoinRequest):
+    user = join_request.from_user
+    create_user_if_not_exist(telegram_id=user.id, firstname=user.first_name, username=user.username)
+
+    channel = join_request_channels.get_join_request_channel_or_none(channel_id=join_request.chat.id)
+    if not channel:
+        return
+
+    if channel.welcome_text:
+        await join_request.bot.send_message(chat_id=user.id, text=channel.welcome_text)
+
+    if channel.allow_approving:
+        join_request_channels.increase_requests_approved_count(channel_id=channel.channel_id)
+        await join_request.approve()
+
+
+# async def handle_start_group(update: ChatMemberUpdated):
+#     print(update)
 
 
 def register_chat_members_handlers(dp: Dispatcher):
-    dp.register_message_handler(handle_new_chat_member, content_types=[ContentType.NEW_CHAT_MEMBERS])
-    dp.register_message_handler(handle_left_chat_member, content_types=[ContentType.LEFT_CHAT_MEMBER])
+    # Запрос на вступление в канал / чат
+    dp.register_chat_join_request_handler(handle_join_request)
+
+    # Отписка от канала / чата
+    dp.register_chat_member_handler(handle_left_chat_member, lambda update: update.new_chat_member.status == 'left')
