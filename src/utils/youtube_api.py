@@ -2,7 +2,7 @@ from pytube import YouTube
 
 
 def get_download_link(url: str) -> tuple[str | None, str | None]:
-    yt = YouTube(url)
+    yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
 
     video_streams = yt.streams.filter(file_extension='mp4', progressive=True).order_by('resolution').desc()
 

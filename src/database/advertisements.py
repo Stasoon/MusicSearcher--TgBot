@@ -5,9 +5,9 @@ from .models import Advertisement, AdShowCounter
 
 
 # Create
-def create_ad(text: str, markup_json: str | dict = None) -> None:
+def create_ad(text: str, markup_json: str | dict = None, show_preview: bool = False) -> None:
     markup_data = str(markup_json) if markup_json else None
-    Advertisement.create(text=text, markup_json=markup_data)
+    Advertisement.create(text=text, markup_json=markup_data, show_preview=show_preview)
 
 
 def increase_counter_and_get_value(user_id) -> int:
@@ -26,6 +26,11 @@ def reset_counter(user_id) -> None:
 
 
 # Read
+
+def get_ad_by_id(ad_id: int) -> Advertisement | None:
+    return Advertisement.get_or_none(id=ad_id)
+
+
 def get_active_ads() -> list[Advertisement]:
     return Advertisement.select().where(Advertisement.is_active == True)
 
@@ -48,6 +53,13 @@ def get_random_ad() -> Advertisement | None:
     if random_ad.markup_json:
         random_ad.markup_json = json.loads(random_ad.markup_json)
     return random_ad
+
+
+# Update
+def change_show_preview(advertisement: Advertisement, show_preview: bool):
+    advertisement.show_preview = show_preview
+    advertisement.save()
+    return Advertisement.get(id=advertisement.id)
 
 
 # Delete

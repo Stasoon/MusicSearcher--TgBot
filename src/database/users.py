@@ -33,6 +33,11 @@ def get_users_total_count() -> int:
     return User.select().count()
 
 
+def get_online_users_count(minutes_threshold=15) -> int:
+    threshold_time = datetime.now() - timedelta(minutes=minutes_threshold)
+    return User.select().where(User.last_activity >= threshold_time).count()
+
+
 def get_users_registered_within_hours_count(hours: int) -> int:
     start_time = datetime.now() - timedelta(hours=hours)
     users_count = User.select().where(User.registration_timestamp >= start_time).count()

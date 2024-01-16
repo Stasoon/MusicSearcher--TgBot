@@ -43,10 +43,14 @@ def get_cached_songs(keys) -> List[Song]:
 
 
 def get_cached_songs_for_request(
-        q: str, offset: int = 0, count: int = 10, query_hashed: bool = True
+        q: str, offset: int = 0, count: int = 10, query_hashed: bool = False
 ) -> tuple[int, Union[List[Song], None]]:
+
     query_hash = str(hash(q.lower())) if not query_hashed else q
     data = redis_client.get(name=query_hash)
+
+    print(q, query_hash)
+
     if data:
         song_keys = json.loads(data)
         song_count = len(song_keys)

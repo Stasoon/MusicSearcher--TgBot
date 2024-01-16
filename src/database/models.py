@@ -30,6 +30,7 @@ class User(_BaseModel):
     username = CharField(null=True, default='Пользователь')
     lang_code = CharField(max_length=2, null=True, default=None)
     referral_link = CharField(null=True)
+    last_activity = DateTimeField()
     registration_timestamp = DateTimeField()
 
 
@@ -61,6 +62,7 @@ class Advertisement(_BaseModel):
     text = TextField()
     markup_json = TextField(null=True)
     showed_count = IntegerField(default=0)
+    show_preview = BooleanField(default=False)
     is_active = BooleanField(default=True)
 
 

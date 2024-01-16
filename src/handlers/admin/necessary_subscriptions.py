@@ -118,24 +118,30 @@ class Handlers:
     @classmethod
     def register_necessary_subscriptions_handlers(cls, dp: Dispatcher):
         # обработка текста кнопки из меню админа
-        dp.register_message_handler(cls.__handle_subchecking_message,
-                                    is_admin=True,
-                                    text=Keyboards.reply_button_for_admin_menu.text)
+        dp.register_message_handler(
+            cls.__handle_subchecking_message,
+            is_admin=True,
+            text=Keyboards.reply_button_for_admin_menu.text
+        )
 
         # обработка калбэка добавить канал
         dp.register_callback_query_handler(cls.__handle_addchannel_callback, text='addchannel')
 
         # обработка пересланного поста для добавления канала
-        dp.register_message_handler(cls.__handle_channel_post_message,
-                                    is_admin=True,
-                                    content_types=['any'],
-                                    state=SubscriptionChannelAdding.wait_for_post)
+        dp.register_message_handler(
+            cls.__handle_channel_post_message,
+            is_admin=True,
+            content_types=['any'],
+            state=SubscriptionChannelAdding.wait_for_post
+        )
 
         # обработка сообщения со ссылкой
-        dp.register_message_handler(cls.__handle_message_with_url,
-                                    is_admin=True,
-                                    content_types=['text'],
-                                    state=SubscriptionChannelAdding.wait_for_url)
+        dp.register_message_handler(
+            cls.__handle_message_with_url,
+            is_admin=True,
+            content_types=['text'],
+            state=SubscriptionChannelAdding.wait_for_url
+        )
 
         # обработка калбэка отмены добавления канала
         dp.register_callback_query_handler(cls.__handle_cancel_callback, text='cancel', state='*')

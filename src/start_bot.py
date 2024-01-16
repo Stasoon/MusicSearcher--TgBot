@@ -5,6 +5,7 @@ from aiogram import executor
 from aiogram.types import AllowedUpdates
 
 from src.middlewares.throttling import ThrottlingMiddleware
+from src.middlewares.user_activity import UserActivityMiddleware
 from src.set_bot_commands import set_bot_commands
 from src.utils.cache_songs import redis_client
 from src.utils.update_songs_catalog import run_periodic_catalog_updates
@@ -25,6 +26,7 @@ async def on_startup(_):
     await set_bot_commands(bot=bot)
 
     # Регистрация middlewares
+    dp.middleware.setup(UserActivityMiddleware())
     dp.middleware.setup(ThrottlingMiddleware())
     dp.middleware.setup(i18n)
 

@@ -105,7 +105,7 @@ async def handle_songs_navigation_callbacks(callback: CallbackQuery, callback_da
     # Получаем песни
     category = callback_data.get('category')
     target_data = callback_data.get('target_data')
-    songs = await get_next_page_songs(category, callback, songs_per_page, offset, target_data)
+    songs = await get_next_page_songs(category, callback, songs_per_page, offset, target_data=target_data)
 
     if len(songs) < songs_per_page:
         await callback.answer()

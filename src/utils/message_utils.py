@@ -30,7 +30,7 @@ async def send_advertisement(bot: Bot, user_id: int):
 
     await bot.send_message(
         chat_id=user_id, text=text, reply_markup=markup,
-        disable_web_page_preview=True, parse_mode='HTML'
+        disable_web_page_preview=not ad.show_preview, parse_mode='HTML'
     )
 
 

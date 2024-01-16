@@ -10,7 +10,6 @@ from aiogram.utils.markdown import quote_html
 from aiogram import Dispatcher
 
 from config import Config
-from src.database.advertisements import get_random_ad
 from src.utils.cache_songs import get_cached_songs_for_request, cache_request, get_cached_song
 from src.utils.message_utils import send_audio_message, send_and_delete_timer, get_media_file_url, send_advertisement
 from src.messages.user import UserMessages
@@ -110,7 +109,7 @@ async def make_api_request(message: Message, query: str) -> tuple[int, list[Song
 
 async def __send_found_songs(message: Message, query: str, found_count: int, songs: list[Song], caption: str):
     if not songs:
-        await send_error_notification(e="Песня не найдена\n", message=message)
+        # await send_error_notification(e="Песня не найдена\n", message=message)
         await message.reply(text=UserMessages.get_song_not_found_error(), parse_mode='HTML')
         return
 
@@ -118,7 +117,7 @@ async def __send_found_songs(message: Message, query: str, found_count: int, son
     max_pages = possible_pages_cnt if possible_pages_cnt < MAX_SONG_PAGES_COUNT else MAX_SONG_PAGES_COUNT
 
     markup = UserKeyboards.get_found_songs(
-        songs[:SONGS_PER_PAGE], current_page_num=1, max_pages=max_pages, target_data=hash(query)
+        songs[:SONGS_PER_PAGE], current_page_num=1, max_pages=max_pages, target_data=hash(query.lower())
     )
     await message.answer(text=quote_html(caption), reply_markup=markup)
 
@@ -163,8 +162,13 @@ async def handle_media_message(message: Message):
 @send_and_delete_timer()
 async def handle_recognize_song_from_downloaded_video_callback(callback: CallbackQuery):
     await callback.message.edit_reply_markup(reply_markup=None)
-    video_url = await get_media_file_url(bot=callback.bot, message=callback.message)
-    await __send_recognized_song(message=callback.message, file_url=video_url)
+    try:
+        video_url = await get_media_file_url(bot=callback.bot, message=callback.message)
+        await __send_recognized_song(message=callback.message, file_url=video_url)
+    except Exception as e:
+        await callback.message.answer(text=UserMessages.get_song_not_found_error())
+        logger.error(e)
+        return
 
 
 @rate_limit(limit=0.8, key='download_youtube')
@@ -197,12 +201,18 @@ async def handle_youtube_link(message: Message):
 @rate_limit(limit=0.8, key='download_tiktok')
 @send_and_delete_timer()
 async def handle_tik_tok_link(message: Message):
-    download_link = await tiktok_api.get_tiktok_download_link(message.text)
-    video_file = InputFile.from_url(download_link)
-    try:
-        await message.answer_video(video=video_file, reply_markup=UserKeyboards.get_recognize_song_from_video_button())
-    except (NetworkError, FileIsTooBig):
-        await message.answer(text=UserMessages.get_file_too_big_error())
+    for _ in range(5):
+        download_link = await tiktok_api.get_tiktok_download_link(message.text)
+        video_file = InputFile.from_url(download_link)
+
+        try:
+            await message.answer_video(video=video_file, reply_markup=UserKeyboards.get_recognize_song_from_video_button())
+        except (NetworkError, FileIsTooBig):
+            await message.answer(text=UserMessages.get_file_too_big_error())
+        except Exception:
+            await asyncio.sleep(0.5)
+        else:
+            break
 
 
 async def load_song_file(song_id, owner_id):
@@ -218,7 +228,6 @@ async def load_song_file(song_id, owner_id):
     return file, song_title, artist
 
 
-@rate_limit(limit=0.35, key='show_song')
 async def handle_show_song_callback(callback: CallbackQuery, callback_data: SongCallback):
     await callback.answer()
     try: await callback.bot.send_chat_action(chat_id=callback.from_user.id, action='UPLOAD_VOICE')

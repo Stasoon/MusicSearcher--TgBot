@@ -39,6 +39,7 @@ class MailingPostCreating(StatesGroup):
 
 class AdvertisementAdding(StatesGroup):
     wait_for_content_message = State()
+    add_preview = State()
     wait_for_markup_data = State()
     wait_for_confirm = State()
 
