@@ -15,6 +15,7 @@ from src.database import register_models
 from src.create_bot import bot, dp
 from config import Config, i18n
 from src.utils import logger
+from src.utils.vk_parsing.song_cover import VkSongCover
 from src.utils.vkpymusic import RuCaptchaDecoder, SessionsManager, Session
 
 

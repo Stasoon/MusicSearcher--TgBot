@@ -13,6 +13,7 @@ from config import Config
 from src.utils.cache_songs import get_cached_songs_for_request, cache_request, get_cached_song
 from src.utils.message_utils import send_audio_message, send_and_delete_timer, get_media_file_url, send_advertisement
 from src.messages.user import UserMessages
+from src.utils.vk_parsing.song_cover import VkSongCover
 from src.utils.vkpymusic import SessionsManager, Song
 from src.utils import logger, shazam_api, tiktok_api
 from src.misc.callback_data import SongCallback
@@ -247,11 +248,14 @@ async def handle_show_song_callback(callback: CallbackQuery, callback_data: Song
         await callback.message.answer(UserMessages.get_song_not_found_error())
         return
 
+    cover_url = VkSongCover().get_cover_by_song_id(song_id=song_id, owner_id=owner_id)
+
     # Отправляем файл
     try:
         file_msg = await send_audio_message(
             bot=callback.bot, chat_id=callback.message.chat.id,
-            song_title=song_title, artist_name=artist, file=file
+            song_title=song_title, artist_name=artist, file=file,
+            cover=InputFile.from_url(cover_url)
         )
     except NetworkError:
         await callback.message.answer(text=UserMessages.get_file_too_big_error())

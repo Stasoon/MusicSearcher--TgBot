@@ -128,7 +128,7 @@ class Messages:
             f'📊 Статистика \n\n'
             f'🎵 Песен в кэше: {get_hashed_songs_count()} \n'
             f'👥 Всего: {users.get_users_total_count()} \n'
-            f'🌐 Онлайн: {users.get_online_users_count()}'
+            f'🌐 Онлайн: {users.get_online_users_count()} \n'
         )
 
         text += ' | '.join(

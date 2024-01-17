@@ -49,8 +49,6 @@ def get_cached_songs_for_request(
     query_hash = str(hash(q.lower())) if not query_hashed else q
     data = redis_client.get(name=query_hash)
 
-    print(q, query_hash)
-
     if data:
         song_keys = json.loads(data)
         song_count = len(song_keys)

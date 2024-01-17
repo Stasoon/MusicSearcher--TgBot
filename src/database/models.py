@@ -30,7 +30,7 @@ class User(_BaseModel):
     username = CharField(null=True, default='Пользователь')
     lang_code = CharField(max_length=2, null=True, default=None)
     referral_link = CharField(null=True)
-    last_activity = DateTimeField()
+    last_activity = DateTimeField(null=True)
     registration_timestamp = DateTimeField()
 
 
