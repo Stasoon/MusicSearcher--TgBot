@@ -1,5 +1,7 @@
+import os.path
+
 from aiogram import Bot
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, InputFile
 from aiogram.utils.exceptions import BadRequest
 
 from src.database.advertisements import get_random_ad, increase_counter_and_get_value, reset_counter
@@ -8,6 +10,7 @@ from src.messages.user import UserMessages
 from src.keyboards.user import UserKeyboards
 from src.utils.keyboard_utils import get_inline_kb_from_json
 from src.filters.is_subscriber import get_not_subscribed_channels
+from config import Config
 
 
 async def send_advertisement(bot: Bot, user_id: int):
@@ -30,7 +33,7 @@ async def send_advertisement(bot: Bot, user_id: int):
 
     await bot.send_message(
         chat_id=user_id, text=text, reply_markup=markup,
-        disable_web_page_preview=not ad.show_preview, parse_mode='HTML'
+        disable_web_page_preview=not ad.show_preview
     )
 
 
@@ -75,8 +78,13 @@ def send_and_delete_timer():
 
 
 async def send_audio_message(bot: Bot, chat_id: int, file, song_title=None, artist_name=None, cover=None) -> Message:
-    """Sends an audio message in response to a callback query."""
+    """ Отправляет песню с подписью """
     bot_username = (await bot.get_me()).username
+
+    is_cover_exists = os.path.exists(Config.DEFAULT_COVER_PATH)
+    if is_cover_exists or (is_cover_exists and not cover):
+        cover = InputFile(Config.DEFAULT_COVER_PATH)
+
     audio_message = await bot.send_audio(
         chat_id=chat_id, audio=file, title=song_title,
         performer=artist_name, thumb=cover,

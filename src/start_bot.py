@@ -7,7 +7,7 @@ from aiogram.types import AllowedUpdates
 from src.middlewares.throttling import ThrottlingMiddleware
 from src.middlewares.user_activity import UserActivityMiddleware
 from src.set_bot_commands import set_bot_commands
-from src.utils.cache_songs import redis_client
+# from src.utils.cache_songs import redis_client
 from src.utils.update_songs_catalog import run_periodic_catalog_updates
 from src.handlers import register_all_handlers
 from src.filters import register_all_filters
@@ -15,7 +15,6 @@ from src.database import register_models
 from src.create_bot import bot, dp
 from config import Config, i18n
 from src.utils import logger
-from src.utils.vk_parsing.song_cover import VkSongCover
 from src.utils.vkpymusic import RuCaptchaDecoder, SessionsManager, Session
 
 
@@ -54,7 +53,7 @@ async def on_startup(_):
 
 async def on_shutdown(_):
     logger.info('Бот остановлен')
-    redis_client.close()
+    # redis_client.close()
 
 
 def start_bot():

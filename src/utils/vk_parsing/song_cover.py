@@ -15,11 +15,12 @@ def two_factor():
 class VkSongCover(metaclass=SingletonMeta):
     sessions = []
 
-    def make_auth(self, login: str, password: str) -> vk_api.VkApi | None:
-        vk_session = vk_api.VkApi(login=login, password=password, app_id=2685278, auth_handler=two_factor)
+    def make_auth(self, login: str, password: str, token: str = None) -> vk_api.VkApi | None:
+        vk_session = vk_api.VkApi(login=login, password=password, token=token, app_id=6287487, auth_handler=two_factor)#login=login, password=password, app_id=2685278, auth_handler=two_factor)
+        vk_session.token = {'access_token': token}
 
         try:
-            vk_session.auth(token_only=True)
+            vk_session.auth(reauth=True)
         except vk_api.AuthError as error_msg:
             logger.error(error_msg)
             return None
@@ -32,7 +33,8 @@ class VkSongCover(metaclass=SingletonMeta):
             return None
 
         try:
-            audio = VkAudio(random.choice(self.sessions))
+            session = random.choice(self.sessions)
+            audio = VkAudio(session)
             song = audio.get_audio_by_id(owner_id=owner_id, audio_id=song_id)
             song_covers = song.get('track_covers')
 

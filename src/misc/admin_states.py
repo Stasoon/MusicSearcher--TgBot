@@ -1,6 +1,10 @@
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
+class DefaultCoverSetting(StatesGroup):
+    wait_for_photo = State()
+
+
 class StatsGetting(StatesGroup):
     wait_for_hours_count = State()
 

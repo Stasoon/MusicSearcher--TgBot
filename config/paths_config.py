@@ -6,3 +6,4 @@ class PathsConfig:
     WEBDRIVER_PATH = WORKDIR / 'webdriver/chromedriver.exe'
     LOCALES_DIR = WORKDIR.parent/'locales'
     CSV_FOLDER = './db_exports'
+    DEFAULT_COVER_TXT = 'cover.txt'

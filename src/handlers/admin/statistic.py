@@ -10,7 +10,7 @@ from aiogram.types import KeyboardButton, InlineKeyboardButton, InlineKeyboardMa
 from aiogram.utils.callback_data import CallbackData
 
 from src.misc.admin_states import StatsGetting
-from src.database import users
+from src.database import users, bot_chats
 from src.database.song_caches import get_hashed_songs_count
 from src.database.users import get_all_users
 from config import PathsConfig
@@ -126,8 +126,10 @@ class Messages:
         languages = users.get_users_languages()
         text = (
             f'📊 Статистика \n\n'
-            f'🎵 Песен в кэше: {get_hashed_songs_count()} \n'
-            f'👥 Всего: {users.get_users_total_count()} \n'
+            f'🎵 Песен в кэше: {get_hashed_songs_count()} \n\n'
+            
+            f'💬 Всего чатов: {bot_chats.get_bot_chats_count()} \n'
+            f'👥 Всего пользователей: {users.get_users_total_count()} \n'
             f'🌐 Онлайн: {users.get_online_users_count()} \n'
         )
 

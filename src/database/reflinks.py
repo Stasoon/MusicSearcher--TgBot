@@ -3,7 +3,7 @@ from .models import ReferralLink, User
 
 def get_link(reflink: str) -> list | None:
     link = ReferralLink.get_or_none(ReferralLink.name == reflink)
-    return (link.name, link.user_count, link.passed_op_count) if link else None
+    return link if link else None
 
 
 def get_all_links() -> list[ReferralLink]:

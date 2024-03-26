@@ -12,7 +12,6 @@ class Song(VkItem):
     song_id: int
     owner_id: int
     url: str = None
-    # lyrics_id: int = None
 
     def __repr__(self):
         return f"{self.artist} - {self.title}"

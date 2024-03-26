@@ -1,5 +1,6 @@
 from aiogram import Dispatcher
 from aiogram.types import ChatMemberUpdated, ChatJoinRequest
+from aiogram.utils.exceptions import CantInitiateConversation
 
 from src.database import join_request_channels
 from src.database.users import create_user_if_not_exist
@@ -9,9 +10,12 @@ async def handle_left_chat_member(update: ChatMemberUpdated):
     chat = join_request_channels.get_join_request_channel_or_none(channel_id=update.chat.id)
 
     if chat and chat.goodbye_text:
-        await update.bot.send_message(
-            chat_id=update.old_chat_member.user.id, text=chat.goodbye_text
-        )
+        try:
+            await update.bot.send_message(
+                chat_id=update.old_chat_member.user.id, text=chat.goodbye_text
+            )
+        except CantInitiateConversation:
+            pass
 
 
 async def handle_join_request(join_request: ChatJoinRequest):

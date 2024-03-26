@@ -13,9 +13,8 @@ from src.keyboards.user import UserKeyboards
 from src.messages.user import UserMessages
 from src.utils.cache_songs import get_cached_songs_for_request
 from src.utils.vkpymusic import SessionsManager, Song
-from config import i18n
-from config.settings import MAX_SONG_PAGES_COUNT, SONGS_PER_PAGE
-from src.utils.vkpymusic.Session import CaptchaNeeded
+from config import i18n, MAX_SONG_PAGES_COUNT, SONGS_PER_PAGE
+
 
 # region Utils
 
@@ -45,7 +44,7 @@ async def get_next_page_songs(
 ) -> list[Song]:
     match category:
         case 'search':
-            count, songs = get_cached_songs_for_request(
+            count, _, songs = get_cached_songs_for_request(
                 q=target_data, count=songs_per_page, offset=offset, query_hashed=True
             )
             if not songs:

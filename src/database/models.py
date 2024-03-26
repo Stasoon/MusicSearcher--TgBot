@@ -153,12 +153,21 @@ class UserVkProfileRelation(_BaseModel):
 
 
 class YoutubeVideo(_BaseModel):
-    """ Реферальная ссылка """
+    """ Видео с ютуб """
     class Meta:
         db_table = 'youtube_videos'
 
     video_id = CharField(unique=True)
-    file_id = CharField()
+    file_id = CharField(max_length=500)
+
+
+class InstagramVideo(_BaseModel):
+    """ Видео с инстаграм """
+    class Meta:
+        db_table = 'insta_videos'
+
+    video_id = CharField(unique=True)
+    file_id = CharField(max_length=500)
 
 
 def register_models() -> None:

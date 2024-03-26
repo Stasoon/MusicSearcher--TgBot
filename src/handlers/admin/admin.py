@@ -10,6 +10,7 @@ from . import admins_management
 from . import edit_ads
 from . import welcomes
 from . import bot_subscriptions
+from . import edit_default_cover
 
 
 admin_kb = ReplyKeyboardMarkup(
@@ -20,6 +21,7 @@ admin_kb = ReplyKeyboardMarkup(
     necessary_subscriptions.Keyboards.reply_button_for_admin_menu,
     welcomes.Keyboards.reply_button_for_admin_menu,
     edit_ads.Keyboards.reply_button_for_admin_menu,
+    edit_default_cover.Keyboards.reply_button_for_admin_menu,
     refferal_links.Keyboards.reply_button_for_admin_menu,
     admins_management.Keyboards.reply_button_for_admin_menu,
     bot_subscriptions.Keyboards.reply_button_for_admin_menu,
@@ -43,5 +45,6 @@ def register_admin_handlers(dp: Dispatcher):
     refferal_links.Handlers.register_reflinks_handlers(dp)
     admins_management.Handlers.register_admin_management_handlers(dp)
     edit_ads.Handlers.register_edit_ads_handlers(dp)
+    edit_default_cover.register_edit_default_cover_handlers(dp)
     welcomes.Handlers.register_welcome_handlers(dp)
     bot_subscriptions.register_bot_subscriptions_handlers(dp)

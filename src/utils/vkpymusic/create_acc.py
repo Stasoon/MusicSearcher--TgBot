@@ -6,3 +6,4 @@ def authorize_and_get_token(login: str, password: str):
     t.auth()
     token = t.get_token()
     print(token)
+    return token

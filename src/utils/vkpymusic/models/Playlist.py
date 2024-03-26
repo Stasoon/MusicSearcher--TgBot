@@ -4,7 +4,6 @@ from dataclasses import dataclass
 @dataclass
 class Playlist:
     title: str
-    # description: str
     photo: str
     count: int
     access_key: str

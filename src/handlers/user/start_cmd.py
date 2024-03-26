@@ -24,11 +24,10 @@ async def handle_start_command(message: Message, state: FSMContext):
         telegram_id=user.id, firstname=user.first_name, username=user.username, reflink=referral_link
     )
 
-    await message.answer(text=UserMessages.get_welcome(user_name=user.first_name), parse_mode='HTML')
+    await message.answer(text=UserMessages.get_welcome(user_name=user.first_name))
     await message.answer(
         text=UserMessages.get_search_song(),
-        reply_markup=UserKeyboards.get_main_menu_markup(),
-        parse_mode='HTML'
+        reply_markup=UserKeyboards.get_main_menu_markup()
     )
 
 

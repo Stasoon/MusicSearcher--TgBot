@@ -127,7 +127,8 @@ class Handlers:
         )
 
         dp.register_message_handler(
-            cls.__handle_admin_reflinks_button, is_admin=True, text=Keyboards.reply_button_for_admin_menu.text)
+            cls.__handle_admin_reflinks_button, is_admin=True, text=Keyboards.reply_button_for_admin_menu.text
+        )
 
         # создание реферальной ссылки
         dp.register_callback_query_handler(

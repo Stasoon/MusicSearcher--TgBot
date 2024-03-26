@@ -3,7 +3,7 @@ import random
 import asyncio
 from cachetools import TTLCache
 
-from .Session import Session
+from . import Session
 
 
 class SessionsManager:
@@ -20,10 +20,10 @@ class SessionsManager:
         SessionsManager.__instance = None
 
     def add_session(self, session: Session):
-        n = 0
-        while session.name in self.services:
-            session.name += f'_{n}'; n += 1
         self.services[session.name] = session
+
+    def remove_session(self, session: Session):
+        self.services.pop(session.name)
 
     async def get_available_service(self) -> Session:
         while True:

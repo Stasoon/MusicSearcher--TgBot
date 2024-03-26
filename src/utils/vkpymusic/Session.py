@@ -5,6 +5,7 @@ from loguru import logger
 
 from src.utils.vkpymusic.models.Song import Song
 from src.utils.vkpymusic.models.Playlist import Playlist
+from src.utils.vkpymusic.SessionsManager import SessionsManager
 from .CaptchaDecoder import BaseCaptchaDecoder
 from .user_agents import get_vk_user_agent
 
@@ -25,7 +26,7 @@ class SessionAuthorizationFailed(Exception):
 class Session:
     def __init__(self, name: str, token_for_audio: str, captcha_decoder: BaseCaptchaDecoder):
         self.name = name
-        self.__token = token_for_audio
+        self._token = token_for_audio
         self.captcha_decoder = captcha_decoder
 
     async def __process_api_error(self, method, params, error: dict):
@@ -34,16 +35,21 @@ class Session:
         logger.error(f"Ошибка при запросе к API ВК: \n{error} \n{params}")
 
         if error.get('error_msg') == 'Captcha needed':
+            manager = SessionsManager()
+            manager.remove_session(session=self)
+
             captcha_sid = error.get('captcha_sid')
             captcha_url = error.get('captcha_img')
             captcha_bytes = await self.captcha_decoder.get_bytes_from_captcha_url(captcha_url)
             captcha_key = await self.captcha_decoder.get_captcha_key(captcha_bytes)
             params.update(captcha_sid=captcha_sid, captcha_key=captcha_key)
             await self.__get_response_content(method, params=params)
+
+            manager.add_session(session=self)
             raise CaptchaNeeded
         # Ошибка авторизации
         elif error.get('error_code') == 5:
-            raise SessionAuthorizationFailed(error.get('error_msg'), self.__token)
+            raise SessionAuthorizationFailed(error.get('error_msg'), self._token)
         else:
             logger.error(error)
 
@@ -52,7 +58,7 @@ class Session:
     async def __get_response_content(self, method: str, params: dict[str, str or int]) -> dict:
         api_url = f"https://api.vk.com/method/audio.{method}"
         api_parameters = [
-            ("access_token", self.__token),
+            ("access_token", self._token),
             ("https", 1),
             ("lang", "ru"),
             ("extended", 1),
