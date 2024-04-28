@@ -4,6 +4,7 @@ from aiogram.dispatcher.filters import CommandStart, ChatTypeFilter
 from aiogram.types import Message, ChatType
 
 from src.database.bot_chats import add_bot_chat
+from src.database.models import WaitAnswerWelcome
 from src.database.users import create_user_if_not_exist
 from src.keyboards.user import UserKeyboards
 from src.messages.user import UserMessages
@@ -16,6 +17,12 @@ async def handle_show_channels_to_subscribe_start_command(message: Message, stat
 
 
 async def handle_start_command(message: Message, state: FSMContext):
+    c: WaitAnswerWelcome = WaitAnswerWelcome.get_or_none(user_id=message.from_user.id)
+    if c:
+        c.channel.answered_welcomes_count += 1
+        c.channel.save()
+        c.delete()
+
     await state.finish()
     user = message.from_user
     args = message.get_full_command()

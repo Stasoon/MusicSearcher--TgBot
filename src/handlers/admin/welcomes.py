@@ -21,7 +21,8 @@ class Messages:
             f'💬 <b>{markdown.quote_html(channel.channel_title)}</b> \n'
             f'🆔 <code>{channel.channel_id}</code> \n\n'
             f'<b>🔢 Одобрено заявок:</b> <code>{channel.approved_requests_count}</code> \n'
-            f'Отправлено приветствий: {channel.sent_welcomes_count} \n\n'
+            f'Отправлено приветствий: {channel.sent_welcomes_count} \n'
+            f'Ответили боту: {channel.answered_welcomes_count}\n\n'
             f'<b>👋 Текст приветствия:</b> \n{channel.welcome_text} \n\n'
             f'<b>🚶 Текст прощания:</b> \n{channel.goodbye_text} \n\n'
         )

@@ -1,9 +1,12 @@
 from aiogram import Dispatcher
+from aiogram.dispatcher import FSMContext
 from aiogram.types import ChatMemberUpdated, ChatJoinRequest
 from aiogram.utils.exceptions import CantInitiateConversation
 
 from src.database import join_request_channels
+from src.database.models import WaitAnswerWelcome
 from src.database.users import create_user_if_not_exist
+from src.misc.user_states import AnswerWelcomeStates
 
 
 async def handle_left_chat_member(update: ChatMemberUpdated):
@@ -34,6 +37,8 @@ async def handle_join_request(join_request: ChatJoinRequest):
     if channel.allow_approving:
         join_request_channels.increase_requests_approved_count(channel_id=channel.channel_id)
         await join_request.approve()
+
+    WaitAnswerWelcome.get_or_create(channel=channel, user_id=user.id)
 
 
 # async def handle_start_group(update: ChatMemberUpdated):

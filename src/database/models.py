@@ -87,6 +87,7 @@ class JoinRequestChannel(_BaseModel):
     goodbye_text = TextField(null=True)
     allow_approving = BooleanField(default=True)
     sent_welcomes_count = IntegerField(default=0)
+    answered_welcomes_count = IntegerField(default=0)
     approved_requests_count = IntegerField(default=0)
 
 
@@ -185,6 +186,11 @@ class ChatSearchStats(_BaseModel):
 
     date = DateField(primary_key=True)
     downloads_count = IntegerField(default=0)
+
+
+class WaitAnswerWelcome(_BaseModel):
+    channel = ForeignKeyField(model=JoinRequestChannel)
+    user_id = BigIntegerField()
 
 
 def register_models() -> None:
