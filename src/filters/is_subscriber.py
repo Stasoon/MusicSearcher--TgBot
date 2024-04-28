@@ -1,5 +1,5 @@
 from aiogram.types import ChatMemberStatus, CallbackQuery
-from aiogram.utils.exceptions import Unauthorized, ChatNotFound, BotKicked
+from aiogram.utils.exceptions import Unauthorized, ChatNotFound, BotKicked, BadRequest
 from aiogram.dispatcher.filters import BoundFilter
 from aiogram import Bot
 
@@ -19,7 +19,7 @@ async def get_not_subscribed_channels(bot, user_id):
 async def check_status_in_channel_is_member(bot: Bot, channel_id: int, user_id: int) -> bool:
     try:
         user = await bot.get_chat_member(channel_id, user_id)
-    except (Unauthorized, ChatNotFound, BotKicked) as e:
+    except (Unauthorized, ChatNotFound, BotKicked, BadRequest) as e:
         logger.exception(e)
         return True
 

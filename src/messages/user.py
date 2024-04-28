@@ -114,7 +114,7 @@ class UserMessages:
 
     @staticmethod
     def get_song_not_recognized() -> str:
-        return 'Не удалось узнать песню 😢'
+        return _('Не удалось узнать песню 😢')
 
     @staticmethod
     def get_profile_not_found() -> str:

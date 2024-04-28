@@ -28,6 +28,8 @@ async def handle_join_request(join_request: ChatJoinRequest):
 
     if channel.welcome_text:
         await join_request.bot.send_message(chat_id=user.id, text=channel.welcome_text)
+        channel.sent_welcomes_count += 1
+        channel.save()
 
     if channel.allow_approving:
         join_request_channels.increase_requests_approved_count(channel_id=channel.channel_id)

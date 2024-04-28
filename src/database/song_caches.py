@@ -14,5 +14,5 @@ def get_song_file_id(song_id: int, owner_id: int) -> str | None:
     return song_hash.file_id if song_hash else None
 
 
-def get_hashed_songs_count() -> int:
+def get_cached_songs_count() -> int:
     return SongCache.select().count()

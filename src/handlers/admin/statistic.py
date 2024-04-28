@@ -1,6 +1,6 @@
 import os
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 
 import psutil
@@ -8,10 +8,12 @@ from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery, InputFile
 from aiogram.utils.callback_data import CallbackData
+from peewee import fn
 
+from src.database.models import DownloadsByDays, ChatSearchStats
 from src.misc.admin_states import StatsGetting
 from src.database import users, bot_chats
-from src.database.song_caches import get_hashed_songs_count
+from src.database.song_caches import get_cached_songs_count
 from src.database.users import get_all_users
 from config import PathsConfig
 
@@ -30,7 +32,7 @@ class Utils:
         return file_name
 
     @staticmethod
-    def write_users_to_xl() -> str:
+    def write_users_to_csv() -> str:
         file_name = Utils.__get_users_csv_filename()
 
         with open(file_name, 'w', newline='', encoding='utf-8-sig') as csv_file:
@@ -124,11 +126,21 @@ class Messages:
     @staticmethod
     def get_menu():
         languages = users.get_users_languages()
+
+        today = DownloadsByDays.get_or_none(date=datetime.today())
+        yesterday = DownloadsByDays.get_or_none(date=datetime.today() - timedelta(days=1))
+
         text = (
             f'📊 Статистика \n\n'
-            f'🎵 Песен в кэше: {get_hashed_songs_count()} \n\n'
+            
+            f'🎵 Аудио в базе: {get_cached_songs_count()} \n'
+            f'Скачиваний сегодня: {today.downloads_count if today else 0} \n'
+            f'Скачиваний вчера: {yesterday.downloads_count if yesterday else 0} \n'
+            f'Скачиваний всего: {DownloadsByDays.select(fn.SUM(DownloadsByDays.downloads_count)).scalar() or 0} \n\n'
             
             f'💬 Всего чатов: {bot_chats.get_bot_chats_count()} \n'
+            f'Поиск аудио в чате: {ChatSearchStats.select(fn.SUM(ChatSearchStats.downloads_count)).scalar() or 0} \n\n'
+            
             f'👥 Всего пользователей: {users.get_users_total_count()} \n'
             f'🌐 Онлайн: {users.get_online_users_count()} \n'
         )
@@ -153,8 +165,9 @@ class Handlers:
         await message.answer(text=Messages.get_menu(), reply_markup=Keyboards.menu_markup)
 
     @staticmethod
-    async def __handle_show_stats_callback(callback: CallbackQuery, state: FSMContext,
-                                           callback_data: statistic_callback):
+    async def __handle_show_stats_callback(
+            callback: CallbackQuery, state: FSMContext, callback_data: statistic_callback
+    ):
         value = callback_data.get('value')
         message = callback.message
 
@@ -184,7 +197,7 @@ class Handlers:
 
     @staticmethod
     async def __handle_export_callback(callback: CallbackQuery):
-        file_name = Utils.write_users_to_xl()
+        file_name = Utils.write_users_to_csv()
 
         with open(file_name, 'rb') as file:
             await callback.message.answer_document(document=file)

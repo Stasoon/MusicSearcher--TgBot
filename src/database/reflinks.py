@@ -1,7 +1,7 @@
 from .models import ReferralLink, User
 
 
-def get_link(reflink: str) -> list | None:
+def get_link(reflink: str) -> ReferralLink | None:
     link = ReferralLink.get_or_none(ReferralLink.name == reflink)
     return link if link else None
 

@@ -2,7 +2,7 @@ from peewee import (
     Model, PostgresqlDatabase, SqliteDatabase, AutoField,
     SmallIntegerField, BigIntegerField, IntegerField,
     DateTimeField, CharField, TextField, BooleanField,
-    ForeignKeyField
+    ForeignKeyField, DateField
 )
 from config import DatabaseConfig
 
@@ -86,6 +86,7 @@ class JoinRequestChannel(_BaseModel):
     welcome_text = TextField(null=True)
     goodbye_text = TextField(null=True)
     allow_approving = BooleanField(default=True)
+    sent_welcomes_count = IntegerField(default=0)
     approved_requests_count = IntegerField(default=0)
 
 
@@ -168,6 +169,22 @@ class InstagramVideo(_BaseModel):
 
     video_id = CharField(unique=True)
     file_id = CharField(max_length=500)
+
+
+class DownloadsByDays(_BaseModel):
+    class Meta:
+        db_table = 'downloads_by_days'
+
+    date = DateField(primary_key=True)
+    downloads_count = IntegerField(default=0)
+
+
+class ChatSearchStats(_BaseModel):
+    class Meta:
+        db_table = 'chat_search_stats'
+
+    date = DateField(primary_key=True)
+    downloads_count = IntegerField(default=0)
 
 
 def register_models() -> None:
